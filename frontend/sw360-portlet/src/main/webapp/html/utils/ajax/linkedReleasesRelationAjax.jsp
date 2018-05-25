@@ -43,6 +43,7 @@
             </select>
         </td>
         <td class="deletor">
+            <img src="<%=request.getContextPath()%>/images/edit.png" class="editReleaseLink" alt="<sw360:out value='${releaseLink.name}'/>">
             <img src="<%=request.getContextPath()%>/images/Trash.png" onclick="deleteReleaseLink('releaseLinkRow${uuid}')" alt="Delete">
         </td>
     </tr>

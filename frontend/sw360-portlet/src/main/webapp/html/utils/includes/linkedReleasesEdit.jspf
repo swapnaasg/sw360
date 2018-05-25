@@ -19,7 +19,7 @@
            <col style="width: 20%;" />
            <col style="width: 20%;" />
            <col style="width: 20%;" />
-           <col style="width: 45px;" /> <!-- width of one action (25) with padding of 10 for the column-->
+           <col style="width: 80px;" /> <!-- width of one action (25) with padding of 10 for the column-->
        </colgroup>
     <thead>
         <tr>

@@ -67,6 +67,11 @@
 
     require(['jquery', /* jquery-plugins */ 'datatables', 'jquery-ui', 'jquery-confirm'], function($) {
 
+        $(".editReleaseLink").click(function () {
+            var alt = $(this).attr("alt")
+            showReleaseDialogAndSearch(alt);
+        });
+
         $("#addLinkedReleasesToReleaseButton").on('click', showReleaseDialog);
         $('#releaseSearchButton').on('click', function() { ReleaseContentFromAjax('releaseSearchResultsTable', '<%=PortalConstants.RELEASE_SEARCH%>', $('#searchrelease').val(), true); });
         <core_rt:if test="${enableSearchForReleasesFromLinkedProjects}">
@@ -83,6 +88,12 @@
 
         function destroyReleaseDataTable() {
             $('#releaseSearchResultsTable').DataTable().destroy();
+        }
+
+        function showReleaseDialogAndSearch(name) {
+            showReleaseDialog();
+            $('#searchrelease').val(name);
+            $('#releaseSearchButton').click();
         }
 
         function toggleReleasesSearchNotification() {
