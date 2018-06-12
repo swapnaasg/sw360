@@ -178,7 +178,6 @@ public class ProjectPortlet extends FossologyAwarePortlet {
     }
 
     private void downloadLicenseInfo(ResourceRequest request, ResourceResponse response) throws IOException {
-        final User user = UserCacheHolder.getUserFromRequest(request);
         final String projectId = request.getParameter(PROJECT_ID);
         final String outputGenerator = request.getParameter(PortalConstants.LICENSE_INFO_SELECTED_OUTPUT_FORMAT);
         final Map<String, Set<String>> selectedReleaseAndAttachmentIds = ProjectPortletUtils
@@ -190,41 +189,68 @@ public class ProjectPortlet extends FossologyAwarePortlet {
 
         try {
             final LicenseInfoService.Iface licenseInfoClient = thriftClients.makeLicenseInfoClient();
-            final ProjectService.Iface projectClient = thriftClients.makeProjectClient();
 
-            Project project = projectClient.getProjectById(projectId, user);
+            final User user = UserCacheHolder.getUserFromRequest(request);
+            Project project = thriftClients.makeProjectClient().getProjectById(projectId, user);
             LicenseInfoFile licenseInfoFile = licenseInfoClient.getLicenseInfoFile(project, user, outputGenerator,
                     selectedReleaseAndAttachmentIds, excludedLicensesPerAttachmentId);
-            try {
-                replaceAttachmentUsages(user, selectedReleaseAndAttachmentIds, excludedLicensesPerAttachmentId, project);
-            } catch (TException e) {
-                // there's no need to abort the user's desired action just because the ancillary action of storing selection failed
-                log.warn("LicenseInfo usage is not stored due to exception: ", e);
-            }
-
-            OutputFormatInfo outputFormatInfo = licenseInfoFile.getOutputFormatInfo();
-            String filename = String.format("LicenseInfo-%s-%s.%s", project.getName(), SW360Utils.getCreatedOn(),
-                    outputFormatInfo.getFileExtension());
-            String mimetype = outputFormatInfo.getMimeType();
-            if (isNullOrEmpty(mimetype)) {
-                mimetype = URLConnection.guessContentTypeFromName(filename);
-            }
-
-            PortletResponseUtil.sendFile(request, response, filename, licenseInfoFile.getGeneratedOutput(), mimetype);
+            saveLicenseInfoAttachmentUsages(project, user, selectedReleaseAndAttachmentIds, excludedLicensesPerAttachmentId);
+            sendLicenseInfoResponse(request, response, project, licenseInfoFile);
         } catch (TException e) {
             log.error("Error getting LicenseInfo file for project with id " + projectId + " and generator " + outputGenerator, e);
             response.setProperty(ResourceResponse.HTTP_STATUS_CODE, Integer.toString(HttpServletResponse.SC_INTERNAL_SERVER_ERROR));
         }
     }
 
-    private void replaceAttachmentUsages(User user, Map<String, Set<String>> selectedReleaseAndAttachmentIds, Map<String, Set<LicenseNameWithText>> excludedLicensesPerAttachmentId, Project project) throws TException {
-        List<AttachmentUsage> attachmentUsages = ProjectPortletUtils.makeAttachmentUsages(project, selectedReleaseAndAttachmentIds,
-                excludedLicensesPerAttachmentId);
+    private void sendLicenseInfoResponse(ResourceRequest request, ResourceResponse response, Project project, LicenseInfoFile licenseInfoFile) throws IOException {
+        OutputFormatInfo outputFormatInfo = licenseInfoFile.getOutputFormatInfo();
+        String filename = String.format("LicenseInfo-%s-%s.%s", project.getName(), SW360Utils.getCreatedOn(),
+                outputFormatInfo.getFileExtension());
+        String mimetype = outputFormatInfo.getMimeType();
+        if (isNullOrEmpty(mimetype)) {
+            mimetype = URLConnection.guessContentTypeFromName(filename);
+        }
+
+        PortletResponseUtil.sendFile(request, response, filename, licenseInfoFile.getGeneratedOutput(), mimetype);
+    }
+
+    private void saveLicenseInfoAttachmentUsages(Project project, User user, Map<String, Set<String>> selectedReleaseAndAttachmentIds, Map<String, Set<LicenseNameWithText>> excludedLicensesPerAttachmentId) {
+        try {
+
+            Function<String, UsageData> usageDataGenerator = attachmentContentId -> {
+                Set<String> licenseIds = CommonUtils.nullToEmptySet(excludedLicensesPerAttachmentId.get(attachmentContentId)).stream()
+                        .filter(LicenseNameWithText::isSetLicenseName)
+                        .map(LicenseNameWithText::getLicenseName)
+                        .collect(Collectors.toSet());
+                return UsageData.licenseInfo(new LicenseInfoUsage(licenseIds));
+            };
+            List<AttachmentUsage> attachmentUsages = ProjectPortletUtils.makeAttachmentUsages(project, selectedReleaseAndAttachmentIds,
+                    usageDataGenerator);
+            replaceAttachmentUsages(project, user, attachmentUsages, UsageData.licenseInfo(new LicenseInfoUsage(Collections.emptySet())));
+        } catch (TException e) {
+            // there's no need to abort the user's desired action just because the ancillary action of storing selection failed
+            log.warn("LicenseInfo usage is not stored due to exception: ", e);
+        }
+    }
+
+    private void saveSourcePackageAttachmentUsages(Project project, User user, Map<String, Set<String>> selectedReleaseAndAttachmentIds) {
+        try {
+            Function<String, UsageData> usageDataGenerator = attachmentContentId -> UsageData.sourcePackage(new SourcePackageUsage());
+            List<AttachmentUsage> attachmentUsages = ProjectPortletUtils.makeAttachmentUsages(project, selectedReleaseAndAttachmentIds,
+                    usageDataGenerator);
+            replaceAttachmentUsages(project, user, attachmentUsages, UsageData.sourcePackage(new SourcePackageUsage()));
+        } catch (TException e) {
+            // there's no need to abort the user's desired action just because the ancillary action of storing selection failed
+            log.warn("SourcePackage usage is not stored due to exception: ", e);
+        }
+    }
+
+    private void replaceAttachmentUsages(Project project, User user, List<AttachmentUsage> attachmentUsages, UsageData defaultEmptyUsageData ) throws TException {
         if (PermissionUtils.makePermission(project, user).isActionAllowed(RequestedAction.WRITE)) {
             AttachmentService.Iface attachmentClient = thriftClients.makeAttachmentClient();
             if (attachmentUsages.isEmpty()) {
                 attachmentClient.deleteAttachmentUsagesByUsageDataType(Source.projectId(project.getId()),
-                        UsageData.licenseInfo(new LicenseInfoUsage(Collections.emptySet())));
+                        defaultEmptyUsageData);
             } else {
                 attachmentClient.replaceAttachmentUsages(Source.projectId(project.getId()), attachmentUsages);
             }
@@ -233,11 +259,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         }
     }
 
-    private String getSourceCodeBundleName(ResourceRequest request) throws TException {
-        User user = UserCacheHolder.getUserFromRequest(request);
-        ProjectService.Iface projectClient = thriftClients.makeProjectClient();
-        String projectId = request.getParameter(PROJECT_ID);
-        Project project = projectClient.getProjectById(projectId, user);
+    private String getSourceCodeBundleName(Project project) {
         String timestamp = SW360Utils.getCreatedOn();
         return "SourceCodeBundle-" + project.getName() + "-" + timestamp + ".zip";
     }
@@ -246,17 +268,24 @@ public class ProjectPortlet extends FossologyAwarePortlet {
 
         Map<String, Set<String>> selectedReleaseAndAttachmentIds = ProjectPortletUtils.getSelectedReleaseAndAttachmentIdsFromRequest(request);
         Set<String> selectedAttachmentIds = new HashSet<>();
-        selectedReleaseAndAttachmentIds.entrySet()
-                .forEach(e -> selectedAttachmentIds.addAll(e.getValue()));
+        selectedReleaseAndAttachmentIds.forEach((key, value) -> selectedAttachmentIds.addAll(value));
 
         try {
-            String sourceCodeBundleName = getSourceCodeBundleName(request);
-
+            Project project = getProjectFromRequest(request);
+            final User user = UserCacheHolder.getUserFromRequest(request);
+            saveSourcePackageAttachmentUsages(project, user, selectedReleaseAndAttachmentIds);
+            String sourceCodeBundleName = getSourceCodeBundleName(project);
             new AttachmentPortletUtils()
                     .serveAttachmentBundle(selectedAttachmentIds,request,response, Optional.of(sourceCodeBundleName));
         } catch (TException e) {
             log.error("Failed to get project metadata", e);
         }
+    }
+
+    private Project getProjectFromRequest(ResourceRequest request) throws TException {
+        final User user = UserCacheHolder.getUserFromRequest(request);
+        final String projectId = request.getParameter(PROJECT_ID);
+        return thriftClients.makeProjectClient().getProjectById(projectId, user);
     }
 
     private void serveGetClearingStateSummaries(ResourceRequest request, ResourceResponse response) throws IOException, PortletException {

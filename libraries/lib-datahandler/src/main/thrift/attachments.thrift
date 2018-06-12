@@ -103,9 +103,12 @@ struct AttachmentUsage {
  * If a new type of usage data is defined (like LicenseInfoUsage), the type must be registered in
  *    org.eclipse.sw360.datahandler.couchdb.deserializer.UsageDataDeserializer
  * in order to be properly deserialized when loading from CouchDB
+ * The type also must be registered in ThriftUtils.THRIFT_NESTED_CLASSES in order to be able to be serialized.
  */
 union UsageData {
     1: LicenseInfoUsage licenseInfo;
+    2: SourcePackageUsage sourcePackage;
+    3: ManuallySetUsage manuallySet;
 }
 
 /**
@@ -114,6 +117,20 @@ union UsageData {
  */
 struct LicenseInfoUsage {
     1: required set<string> excludedLicenseIds;
+}
+
+/**
+ * Flags an attachment when it is used for source code bundle generation.
+ */
+struct SourcePackageUsage {
+    1: optional string dummy; // when there are no fields, jackson fails to serialize the object
+}
+
+/**
+ * Flags an attachment when it has been manually designated as used in some way to prevent deletetion.
+ */
+struct ManuallySetUsage {
+    1: optional string dummy; // when there are no fields, jackson fails to serialize the object
 }
 
 struct FilledAttachment {

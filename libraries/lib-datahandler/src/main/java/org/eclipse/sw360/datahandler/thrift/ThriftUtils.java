@@ -66,7 +66,10 @@ public class ThriftUtils {
 
     public static final List<Class<?>> THRIFT_NESTED_CLASSES = ImmutableList.<Class<?>>builder()
             .add(Source.class)
+            .add(UsageData.class)
             .add(LicenseInfoUsage.class)
+            .add(SourcePackageUsage.class)
+            .add(ManuallySetUsage.class)
             .add(Repository.class)
             .add(ClearingInformation.class) // Component service
             .add(CVEReference.class, VendorAdvisory.class, VulnerabilityCheckStatus.class) // Vulnerability Service

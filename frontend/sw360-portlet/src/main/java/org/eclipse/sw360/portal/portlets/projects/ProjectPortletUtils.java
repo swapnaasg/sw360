@@ -39,6 +39,7 @@ import org.eclipse.sw360.portal.users.UserCacheHolder;
 import javax.portlet.PortletRequest;
 import javax.portlet.ResourceRequest;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.eclipse.sw360.portal.common.PortalConstants.CUSTOM_FIELD_PROJECT_GROUP_FILTER;
@@ -260,7 +261,7 @@ public class ProjectPortletUtils {
     }
 
     public static List<AttachmentUsage> makeAttachmentUsages(Project project, Map<String, Set<String>> selectedReleaseAndAttachmentIds,
-            Map<String, Set<LicenseNameWithText>> excludedLicensesPerAttachmentId) {
+                                                             Function<String, UsageData> usageDataGenerator) {
         List<AttachmentUsage> attachmentUsages = Lists.newArrayList();
 
         for(String releaseId : selectedReleaseAndAttachmentIds.keySet()) {
@@ -270,11 +271,8 @@ public class ProjectPortletUtils {
                 usage.setOwner(Source.releaseId(releaseId));
                 usage.setAttachmentContentId(attachmentContentId);
 
-                Set<String> licenseIds = CommonUtils.nullToEmptySet(excludedLicensesPerAttachmentId.get(attachmentContentId)).stream()
-                        .filter(LicenseNameWithText::isSetLicenseName)
-                        .map(LicenseNameWithText::getLicenseName)
-                        .collect(Collectors.toSet());
-                usage.setUsageData(UsageData.licenseInfo(new LicenseInfoUsage(licenseIds)));
+                UsageData usageData = usageDataGenerator.apply(attachmentContentId);
+                usage.setUsageData(usageData);
 
                 attachmentUsages.add(usage);
             }
@@ -282,6 +280,14 @@ public class ProjectPortletUtils {
 
         return attachmentUsages;
     }
+
+//    private static UsageData generateUsageDataForContentId(Map<String, Set<LicenseNameWithText>> excludedLicensesPerAttachmentId, String attachmentContentId) {
+//        Set<String> licenseIds = CommonUtils.nullToEmptySet(excludedLicensesPerAttachmentId.get(attachmentContentId)).stream()
+//                .filter(LicenseNameWithText::isSetLicenseName)
+//                .map(LicenseNameWithText::getLicenseName)
+//                .collect(Collectors.toSet());
+//        return UsageData.licenseInfo(new LicenseInfoUsage(licenseIds));
+//    }
 
     /**
      * Walks through a list of project links and extracts all release attachments

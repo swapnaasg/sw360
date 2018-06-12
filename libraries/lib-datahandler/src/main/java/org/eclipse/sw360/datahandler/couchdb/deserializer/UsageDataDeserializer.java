@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.google.common.collect.Maps;
 import org.eclipse.sw360.datahandler.thrift.attachments.LicenseInfoUsage;
+import org.eclipse.sw360.datahandler.thrift.attachments.ManuallySetUsage;
+import org.eclipse.sw360.datahandler.thrift.attachments.SourcePackageUsage;
 import org.eclipse.sw360.datahandler.thrift.attachments.UsageData;
 
 import java.io.IOException;
@@ -41,6 +43,8 @@ public class UsageDataDeserializer extends StdDeserializer<UsageData> {
     static {
         typeMap = Maps.newHashMap();
         typeMap.put(UsageData._Fields.LICENSE_INFO, LicenseInfoUsage.class);
+        typeMap.put(UsageData._Fields.SOURCE_PACKAGE, SourcePackageUsage.class);
+        typeMap.put(UsageData._Fields.MANUALLY_SET, ManuallySetUsage.class);
     }
 
     private static class GenericUsageData {
