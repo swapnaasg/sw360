@@ -171,7 +171,9 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         } else if (PortalConstants.GET_LICENCES_FROM_ATTACHMENT.equals(action)) {
             serveAttachmentFileLicenses(request, response);
         } else if (PortalConstants.LOAD_LICENSE_INFO_ATTACHMENT_USAGE.equals(action)) {
-            serveLicenseInfoAttachmentUsage(request, response);
+            serveAttachmentUsages(request, response, UsageData.licenseInfo(new LicenseInfoUsage(Sets.newHashSet())));
+        } else if (PortalConstants.LOAD_SOURCE_PACKAGE_ATTACHMENT_USAGE.equals(action)) {
+            serveAttachmentUsages(request, response, UsageData.sourcePackage(new SourcePackageUsage()));
         } else if (isGenericAction(action)) {
             dealWithGenericAction(request, response, action);
         }
@@ -628,23 +630,23 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         }
     }
 
-    private void serveLicenseInfoAttachmentUsage(ResourceRequest request, ResourceResponse response) throws IOException {
+    private void serveAttachmentUsages(ResourceRequest request, ResourceResponse response, UsageData filter) throws IOException {
         final String projectId = request.getParameter(PortalConstants.PROJECT_ID);
         final AttachmentService.Iface attachmentClient = thriftClients.makeAttachmentClient();
 
         try {
             List<AttachmentUsage> usages = attachmentClient.getUsedAttachments(Source.projectId(projectId),
-                    UsageData.licenseInfo(new LicenseInfoUsage(Sets.newHashSet())));
+                    filter);
             String serializedUsages = usages.stream()
                     .map(usage -> WrappedException.wrapTException(() -> THRIFT_JSON_SERIALIZER.toString(usage)))
                     .collect(Collectors.joining(",", "[", "]"));
 
             writeJSON(request, response, serializedUsages);
         } catch (WrappedTException exception) {
-            log.error("cannot retrieve information about used license info files and exclusions.", exception.getCause());
+            log.error("cannot retrieve information about attachment usages.", exception.getCause());
             response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "500");
         } catch (TException exception) {
-            log.error("cannot retrieve information about used license info files and exclusions.", exception);
+            log.error("cannot retrieve information about attachment usages.", exception);
             response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "500");
         }
     }
@@ -807,21 +809,25 @@ public class ProjectPortlet extends FossologyAwarePortlet {
                 request.setAttribute(PROJECT_LIST, mappedProjectLinks);
                 addProjectBreadcrumb(request, response, project);
 
-                AttachmentService.Iface attachmentClient = thriftClients.makeAttachmentClient();
-                Map<Source, Set<String>> containedAttachments = ProjectPortletUtils
-                        .extractContainedAttachments(mappedProjectLinks);
-                Map<Map<Source, String>, Integer> attachmentUsages = attachmentClient.getAttachmentUsageCount(containedAttachments,
-                        UsageData.licenseInfo(new LicenseInfoUsage(Sets.newHashSet())));
-                Map<String, Integer> countMap = attachmentUsages.entrySet().stream().collect(Collectors.toMap(entry -> {
-                    Entry<Source, String> key = entry.getKey().entrySet().iterator().next();
-                    return key.getKey().getFieldValue() + "_" + key.getValue();
-                }, entry -> entry.getValue()));
-                request.setAttribute(ATTACHMENT_USAGE_COUNT_MAP, countMap);
+                storeAttachmentUsageCountInRequest(request, mappedProjectLinks, UsageData.licenseInfo(new LicenseInfoUsage(Sets.newHashSet())));
             } catch (TException e) {
                 log.error("Error fetching project from backend!", e);
                 setSW360SessionError(request, ErrorMessages.ERROR_GETTING_PROJECT);
             }
         }
+    }
+
+    private void storeAttachmentUsageCountInRequest(RenderRequest request, List<ProjectLink> mappedProjectLinks, UsageData filter) throws TException {
+        AttachmentService.Iface attachmentClient = thriftClients.makeAttachmentClient();
+        Map<Source, Set<String>> containedAttachments = ProjectPortletUtils
+                .extractContainedAttachments(mappedProjectLinks);
+        Map<Map<Source, String>, Integer> attachmentUsages = attachmentClient.getAttachmentUsageCount(containedAttachments,
+                filter);
+        Map<String, Integer> countMap = attachmentUsages.entrySet().stream().collect(Collectors.toMap(entry -> {
+            Entry<Source, String> key = entry.getKey().entrySet().iterator().next();
+            return key.getKey().getFieldValue() + "_" + key.getValue();
+        }, entry -> entry.getValue()));
+        request.setAttribute(ATTACHMENT_USAGE_COUNT_MAP, countMap);
     }
 
     private void prepareSourceCodeBundle(RenderRequest request, RenderResponse response) throws IOException, PortletException {
@@ -843,6 +849,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
                         filterAndSortAttachments(SW360Constants.SOURCE_CODE_ATTACHMENT_TYPES), true, user);
                 request.setAttribute(PROJECT_LIST, mappedProjectLinks);
                 addProjectBreadcrumb(request, response, project);
+                storeAttachmentUsageCountInRequest(request, mappedProjectLinks, UsageData.sourcePackage(new SourcePackageUsage()));
             } catch (TException e) {
                 log.error("Error fetching project from backend!", e);
                 setSW360SessionError(request, ErrorMessages.ERROR_GETTING_PROJECT);
