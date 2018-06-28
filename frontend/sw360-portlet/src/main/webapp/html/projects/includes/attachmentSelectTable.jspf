@@ -27,7 +27,7 @@
 <c:set var="tableModeSourceBundle" value="<%=PortalConstants.PROJECT_LINK_TABLE_MODE_SOURCE_BUNDLE%>"/>
 
 <div id="infobar" class="infobar backgroundGrey">
-    <div class="spinner">Loading previously stored seldection...</div>
+    <div class="spinner">Loading previously stored selection...</div>
 </div>
 
 <table class="table info_table" id="LinkedProjectsInfo"

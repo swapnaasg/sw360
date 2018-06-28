@@ -157,6 +157,7 @@ public class PortalConstants {
     public static final String DEFAULT_LICENSE_INFO_HEADER_TEXT = "defaultLicenseInfoHeaderText";
     public static final String DEFAULT_LICENSE_INFO_HEADER_TEXT_FOR_DISPALY = "--default text--";
     public static final Set<String> PROJECT_EXTERNAL_ID_KEYS;
+    public static final String PROJECT_SELECTED_ATTACHMENT_USAGES_BY_RELEASE_ID = "selectedAttachmentUsagesByReleaseId";
 
     public static final String FOSSOLOGY_FINGER_PRINTS = "fingerPrints";
     public static final String USER_LIST = "userList";
@@ -276,6 +277,7 @@ public class PortalConstants {
     public static final String LINKED_OBJECTS_PREFIX = "load_linked_";
     public static final String LOAD_LINKED_PROJECTS_ROWS = LINKED_OBJECTS_PREFIX + "projects_rows";
     public static final String LOAD_LINKED_RELEASES_ROWS = LINKED_OBJECTS_PREFIX + "releases_rows";
+    public static final String LOAD_ATTACHMENT_USAGES_ROWS = "load_attachment_usages_rows";
     public static final String PARENT_BRANCH_ID = "parent_branch_id";
     public static final String PARENT_SCOPE_GROUP_ID = "parentScopeGroupId";
 

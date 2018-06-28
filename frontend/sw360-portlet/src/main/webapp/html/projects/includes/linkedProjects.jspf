@@ -76,7 +76,7 @@
             ajaxTreeTable.setup('LinkedProjectsInfo', config.loadNodeUrl, function(table, node) {
                 var data = {};
                 data[config.portletNamespace + config.parentBranchKey] = node.id;
-                data[config.portletNamespace + 'parentScopeGroupId'] =  config.scopeGroupId;
+                data[config.portletNamespace + 'parentScopeGroupId'] = config.scopeGroupId;
                 return data;
             }, function(table, node, result) {
                 var rows = $(result).filter("tr");

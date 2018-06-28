@@ -174,9 +174,25 @@ public class ProjectPortlet extends FossologyAwarePortlet {
             serveAttachmentUsages(request, response, UsageData.licenseInfo(new LicenseInfoUsage(Sets.newHashSet())));
         } else if (PortalConstants.LOAD_SOURCE_PACKAGE_ATTACHMENT_USAGE.equals(action)) {
             serveAttachmentUsages(request, response, UsageData.sourcePackage(new SourcePackageUsage()));
+        } else if (PortalConstants.LOAD_ATTACHMENT_USAGES_ROWS.equals(action)) {
+            serveAttachmentUsagesRows(request, response);
         } else if (isGenericAction(action)) {
             dealWithGenericAction(request, response, action);
         }
+    }
+
+    private void serveAttachmentUsagesRows(ResourceRequest request, ResourceResponse response) throws PortletException, IOException {
+        prepareLinkedProjects(request);
+        String projectId = request.getParameter(PROJECT_ID);
+        try {
+            List<AttachmentUsage> attachmentUsages =
+                    thriftClients.makeAttachmentClient().getUsedAttachments(Source.projectId(projectId), null);
+            Map<String, List<AttachmentUsage>> attachmentUsagesByProjectId = attachmentUsages.stream().collect(Collectors.groupingBy(AttachmentUsage::getAttachmentContentId));
+
+        } catch (TException e) {
+            throw new PortletException("Cannot load attachment usages", e);
+        }
+        include("/html/projects/includes/attachmentUsagesRows.jsp", request, response, PortletRequest.RESOURCE_PHASE);
     }
 
     private void downloadLicenseInfo(ResourceRequest request, ResourceResponse response) throws IOException {
