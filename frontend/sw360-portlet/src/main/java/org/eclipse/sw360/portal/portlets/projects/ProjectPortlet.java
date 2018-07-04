@@ -76,6 +76,7 @@ import static java.lang.Math.min;
 import static org.eclipse.sw360.datahandler.common.CommonUtils.*;
 import static org.eclipse.sw360.datahandler.common.SW360Constants.CONTENT_TYPE_OPENXML_SPREADSHEET;
 import static org.eclipse.sw360.datahandler.common.SW360Utils.printName;
+import static org.eclipse.sw360.datahandler.common.WrappedException.wrapTException;
 import static org.eclipse.sw360.portal.common.PortalConstants.*;
 
 
@@ -176,23 +177,44 @@ public class ProjectPortlet extends FossologyAwarePortlet {
             serveAttachmentUsages(request, response, UsageData.sourcePackage(new SourcePackageUsage()));
         } else if (PortalConstants.LOAD_ATTACHMENT_USAGES_ROWS.equals(action)) {
             serveAttachmentUsagesRows(request, response);
+        } else if (PortalConstants.SAVE_ATTACHMENT_USAGES.equals(action)) {
+            saveAttachmentUsages(request, response);
         } else if (isGenericAction(action)) {
             dealWithGenericAction(request, response, action);
         }
     }
 
+    private void saveAttachmentUsages(ResourceRequest request, ResourceResponse response) {
+        final String projectId = request.getParameter(PROJECT_ID);
+
+    }
+
     private void serveAttachmentUsagesRows(ResourceRequest request, ResourceResponse response) throws PortletException, IOException {
         prepareLinkedProjects(request);
         String projectId = request.getParameter(PROJECT_ID);
-        try {
-            List<AttachmentUsage> attachmentUsages =
-                    thriftClients.makeAttachmentClient().getUsedAttachments(Source.projectId(projectId), null);
-            Map<String, List<AttachmentUsage>> attachmentUsagesByProjectId = attachmentUsages.stream().collect(Collectors.groupingBy(AttachmentUsage::getAttachmentContentId));
+        putAttachmentUsagesInRequest(request, projectId);
+        include("/html/projects/includes/attachmentUsagesRows.jsp", request, response, PortletRequest.RESOURCE_PHASE);
+    }
 
-        } catch (TException e) {
+    private void putAttachmentUsagesInRequest(PortletRequest request, String projectId) throws PortletException {
+        try {
+            AttachmentService.Iface attachmentClient = thriftClients.makeAttachmentClient();
+            // todo: load all usages at once and filter them on client side. save two round-trips
+            Function<UsageData, Map<String, AttachmentUsage>> loadAttachmentUsages = filter ->
+                    wrapTException(() -> attachmentClient.getUsedAttachments(Source.projectId(projectId), filter)).stream()
+                    .collect(Collectors.toMap(AttachmentUsage::getAttachmentContentId, Function.identity()));
+            Map<String, AttachmentUsage> licenseInfoUsagesByAttContentId = loadAttachmentUsages
+                    .apply(UsageData.licenseInfo(new LicenseInfoUsage(Collections.emptySet())));
+            Map<String, AttachmentUsage> sourcePackageUsagesByAttContentId = loadAttachmentUsages
+                    .apply(UsageData.sourcePackage(new SourcePackageUsage()));
+            Map<String, AttachmentUsage> manualUsagesByAttContentId = loadAttachmentUsages
+                    .apply(UsageData.manuallySet(new ManuallySetUsage()));
+            request.setAttribute(LICENSE_INFO_ATTACHMENT_USAGES, licenseInfoUsagesByAttContentId);
+            request.setAttribute(SOURCE_CODE_ATTACHMENT_USAGES, sourcePackageUsagesByAttContentId);
+            request.setAttribute(MANUAL_ATTACHMENT_USAGES, manualUsagesByAttContentId);
+        } catch (WrappedTException e) {
             throw new PortletException("Cannot load attachment usages", e);
         }
-        include("/html/projects/includes/attachmentUsagesRows.jsp", request, response, PortletRequest.RESOURCE_PHASE);
     }
 
     private void downloadLicenseInfo(ResourceRequest request, ResourceResponse response) throws IOException {
@@ -263,7 +285,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         }
     }
 
-    private void replaceAttachmentUsages(Project project, User user, List<AttachmentUsage> attachmentUsages, UsageData defaultEmptyUsageData ) throws TException {
+    private void replaceAttachmentUsages(Project project, User user, List<AttachmentUsage> attachmentUsages, UsageData defaultEmptyUsageData) throws TException {
         if (PermissionUtils.makePermission(project, user).isActionAllowed(RequestedAction.WRITE)) {
             AttachmentService.Iface attachmentClient = thriftClients.makeAttachmentClient();
             if (attachmentUsages.isEmpty()) {
@@ -294,7 +316,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
             saveSourcePackageAttachmentUsages(project, user, selectedReleaseAndAttachmentIds);
             String sourceCodeBundleName = getSourceCodeBundleName(project);
             new AttachmentPortletUtils()
-                    .serveAttachmentBundle(selectedAttachmentIds,request,response, Optional.of(sourceCodeBundleName));
+                    .serveAttachmentBundle(selectedAttachmentIds, request, response, Optional.of(sourceCodeBundleName));
         } catch (TException e) {
             log.error("Failed to get project metadata", e);
         }
@@ -309,7 +331,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
     private void serveGetClearingStateSummaries(ResourceRequest request, ResourceResponse response) throws IOException, PortletException {
         User user = UserCacheHolder.getUserFromRequest(request);
         List<Project> projects;
-        String ids[] = request.getParameterValues(Project._Fields.ID.toString()+"[]");
+        String ids[] = request.getParameterValues(Project._Fields.ID.toString() + "[]");
         if (ids == null || ids.length == 0) {
             JSONArray jsonResponse = createJSONArray();
             writeJSON(request, response, jsonResponse);
@@ -418,7 +440,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         String projectId = request.getParameter(PortalConstants.PROJECT_ID);
         String encodedDeleteComment = request.getParameter(PortalConstants.MODERATION_REQUEST_COMMENT);
         final User user = UserCacheHolder.getUserFromRequest(request);
-        if(encodedDeleteComment != null) {
+        if (encodedDeleteComment != null) {
             String deleteComment = new String(Base64.getDecoder().decode(encodedDeleteComment));
             user.setCommentMadeDuringModerationRequest(deleteComment);
         }
@@ -605,7 +627,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
     private void addLicenseInfoResultToJsonSerializableLicensesList(LicenseInfoParsingResult licenseInfoResult,
                                                                     List<Map<String, String>> licenses,
                                                                     BiConsumer<String, LicenseNameWithText> storeLicense) {
-        switch (licenseInfoResult.getStatus()){
+        switch (licenseInfoResult.getStatus()) {
             case SUCCESS:
                 Set<LicenseNameWithText> licenseNamesWithTexts = nullToEmptySet(licenseInfoResult.getLicenseInfo().getLicenseNamesWithTexts());
                 List<Map<String, String>> licensesAsObject = licenseNamesWithTexts.stream()
@@ -654,7 +676,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
             List<AttachmentUsage> usages = attachmentClient.getUsedAttachments(Source.projectId(projectId),
                     filter);
             String serializedUsages = usages.stream()
-                    .map(usage -> WrappedException.wrapTException(() -> THRIFT_JSON_SERIALIZER.toString(usage)))
+                    .map(usage -> wrapTException(() -> THRIFT_JSON_SERIALIZER.toString(usage)))
                     .collect(Collectors.joining(",", "[", "]"));
 
             writeJSON(request, response, serializedUsages);
@@ -721,7 +743,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         ProjectService.Iface projectClient = thriftClients.makeProjectClient();
         List<Project> projectList;
         try {
-            if (!isNullOrEmpty(id)){ // the presence of the id signals to load linked projects hierarchy instead of using filters
+            if (!isNullOrEmpty(id)) { // the presence of the id signals to load linked projects hierarchy instead of using filters
                 final Collection<ProjectLink> projectLinks = SW360Utils.getLinkedProjectsAsFlatList(id, true, thriftClients, log, user);
                 List<String> linkedProjectIds = projectLinks.stream().map(ProjectLink::getId).collect(Collectors.toList());
                 projectList = projectClient.getProjectsById(linkedProjectIds, user);
@@ -756,7 +778,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         return filterMap;
     }
 
-    private void addStickyProjectGroupToFilters(PortletRequest request, User user, Map<String, Set<String>> filterMap){
+    private void addStickyProjectGroupToFilters(PortletRequest request, User user, Map<String, Set<String>> filterMap) {
         String stickyGroupFilter = ProjectPortletUtils.loadStickyProjectGroup(request, user);
         if (!isNullOrEmpty(stickyGroupFilter)) {
             String groupFieldName = Project._Fields.BUSINESS_UNIT.getFieldName();
@@ -787,6 +809,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
                 request.setAttribute(ALL_USING_PROJECTS_COUNT, allUsingProjectCount);
                 putReleasesAndProjectIntoRequest(request, id, user);
                 putVulnerabilitiesInRequest(request, id, user);
+                putAttachmentUsagesInRequest(request, id);
                 request.setAttribute(
                         VULNERABILITY_RATINGS_EDITABLE,
                         PermissionUtils.makePermission(project, user).isActionAllowed(RequestedAction.WRITE));
@@ -906,7 +929,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
             vulnerabilityRatings.put(vulnerabilityId, new HashMap<>());
         }
         List<VulnerabilityCheckStatus> vulnerabilityCheckStatusHistory = null;
-        if(vulnerabilityIdToReleaseIdToStatus.containsKey(vulnerabilityId) && vulnerabilityIdToReleaseIdToStatus.get(vulnerabilityId).containsKey(releaseId)) {
+        if (vulnerabilityIdToReleaseIdToStatus.containsKey(vulnerabilityId) && vulnerabilityIdToReleaseIdToStatus.get(vulnerabilityId).containsKey(releaseId)) {
             vulnerabilityCheckStatusHistory = vulnerabilityIdToReleaseIdToStatus.get(vulnerabilityId).get(releaseId);
         }
         if (vulnerabilityCheckStatusHistory != null && vulnerabilityCheckStatusHistory.size() > 0) {
@@ -1024,7 +1047,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
 
             addEditDocumentMessage(request, permissions, documentState);
         } else {
-            if(request.getAttribute(PROJECT) == null) {
+            if (request.getAttribute(PROJECT) == null) {
                 project = new Project();
                 project.setBusinessUnit(user.getDepartment());
                 request.setAttribute(PROJECT, project);
@@ -1032,7 +1055,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
                 try {
                     putDirectlyLinkedProjectsInRequest(request, project, user);
                     putDirectlyLinkedReleasesInRequest(request, project);
-                } catch(TException e) {
+                } catch (TException e) {
                     log.error("Could not put empty linked projects or linked releases in projects view.", e);
                 }
                 request.setAttribute(USING_PROJECTS, Collections.emptySet());
@@ -1111,7 +1134,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
                 AddDocumentRequestSummary summary = client.addProject(project, user);
 
                 AddDocumentRequestStatus status = summary.getRequestStatus();
-                switch(status) {
+                switch (status) {
                     case SUCCESS:
                         String successMsg = "Project " + printName(project) + " added successfully";
                         SessionMessages.add(request, "request_processed", successMsg);

@@ -82,30 +82,27 @@
                 <td>
                     <input type="checkbox"
                            name="<portlet:namespace/><%=PortalConstants.PROJECT_SELECTED_ATTACHMENT_USAGES_BY_RELEASE_ID%>"
-                           value="${projectLink.id}:license:${attachment.attachmentContentId}"
+                           value="${releaseLink.id}:license:${attachment.attachmentContentId}"
                            <core_rt:if test="${!licenseInfoAttachmentTypes.contains(attachment.attachmentType)}">disabled</core_rt:if>
                         <%--<core_rt:if test="${!attachmentSelected && (releaseLink.attachments.size() == 1 || attachment.createdTeam == sw360User.department)}">checked="checked" class="defaultChecked"--%>
                         <%--<core_rt:set var="attachmentSelected" value="true" scope="request"/>--%>
                         <%--</core_rt:if>--%>
+                        <core_rt:if test="${licInfoAttUsages.containsKey(attachment.attachmentContentId)}">checked="checked" class="defaultChecked"</core_rt:if>
                     />
                 </td>
                 <td>
                     <input type="checkbox"
                            name="<portlet:namespace/><%=PortalConstants.PROJECT_SELECTED_ATTACHMENT_USAGES_BY_RELEASE_ID%>"
-                           value="${projectLink.id}:source:${attachment.attachmentContentId}"
+                           value="${releaseLink.id}:source:${attachment.attachmentContentId}"
                            <core_rt:if test="${!sourceCodeAttachmentTypes.contains(attachment.attachmentType)}">disabled</core_rt:if>
-                        <%--<core_rt:if test="${!attachmentSelected && (releaseLink.attachments.size() == 1 || attachment.createdTeam == sw360User.department)}">checked="checked" class="defaultChecked"--%>
-                        <%--<core_rt:set var="attachmentSelected" value="true" scope="request"/>--%>
-                        <%--</core_rt:if>--%>
+                           <core_rt:if test="${sourceAttUsages.containsKey(attachment.attachmentContentId)}">checked="checked" class="defaultChecked"</core_rt:if>
                     />
                 </td>
                 <td>
                     <input type="checkbox"
                            name="<portlet:namespace/><%=PortalConstants.PROJECT_SELECTED_ATTACHMENT_USAGES_BY_RELEASE_ID%>"
-                           value="${projectLink.id}:manual:${attachment.attachmentContentId}"
-                        <%--<core_rt:if test="${!attachmentSelected && (releaseLink.attachments.size() == 1 || attachment.createdTeam == sw360User.department)}">checked="checked" class="defaultChecked"--%>
-                        <%--<core_rt:set var="attachmentSelected" value="true" scope="request"/>--%>
-                        <%--</core_rt:if>--%>
+                           value="${releaseLink.id}:manual:${attachment.attachmentContentId}"
+                           <core_rt:if test="${manualAttUsages.containsKey(attachment.attachmentContentId)}">checked="checked" class="defaultChecked"</core_rt:if>
                     />
                 </td>
             </tr>

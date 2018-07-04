@@ -21,13 +21,18 @@
 <portlet:resourceURL var="loadAttachmentUsagesRowsURL">
     <portlet:param name="<%=PortalConstants.ACTION%>" value='<%=PortalConstants.LOAD_ATTACHMENT_USAGES_ROWS%>'/>
 </portlet:resourceURL>
+<portlet:resourceURL var="saveAttachmentUsagesURL">
+    <portlet:param name="<%=PortalConstants.ACTION%>" value='<%=PortalConstants.SAVE_ATTACHMENT_USAGES%>'/>
+    <portlet:param name="<%=PortalConstants.PROJECT_ID%>" value="${requestScope.project.id}"/>
+</portlet:resourceURL>
+
 
 <link rel="stylesheet" href="<%=request.getContextPath()%>/webjars/jquery-treetable/3.2.0/css/jquery.treetable.css"/>
 <link rel="stylesheet" href="<%=request.getContextPath()%>/css/jquery.treetable.theme.sw360.css"/>
 
 <%--<jsp:useBean id="projectList" type="java.util.List<org.eclipse.sw360.datahandler.thrift.projects.ProjectLink>"--%>
              <%--scope="request"/>--%>
-
+<form id="attachmentUsagesForm" name="attachmentUsagesForm" action="<%=saveAttachmentUsagesURL%>" method="post">
 <table class="table info_table" id="AttachmentUsagesInfo" style="table-layout: auto"
   data-load-node-url="<%=loadAttachmentUsagesRowsURL%>"
   data-portlet-namespace="<portlet:namespace/>"
@@ -60,8 +65,9 @@
 </table>
 <core_rt:if test="${inProjectDetailsContext}">
 <span class="pull-right">
-    <input type="button" class="addButton" id="saveAttachmentUsagesButton" value="Save Usages" class="addButton"/>
+    <input type="submit" class="addButton" id="saveAttachmentUsagesButton" value="Save Usages" class="addButton"/>
 </span>
+</form>
 </core_rt:if>
 
 <script>
@@ -78,12 +84,18 @@
             }, function(table, node, result) {
                 var rows = $(result).filter("tr");
                 table.treetable("loadBranch", node, rows);
+                // next two lines are a workaround for treetable displaying the node as collapsed,
+                // yet also displaying its children, because it expects that all rows in the loadBranch call above
+                // belong to the node, but in our case we load couple levels at a time
+                table.treetable("collapseNode", node.id);
+                table.treetable("expandNode", node.id);
             });
 
             $('#saveAttachmentUsagesButton').click(saveAttachmentUsages);
         });
 
         function saveAttachmentUsages() {
+            $("#attachmentUsagesForm").submit();
         }
 
     });
