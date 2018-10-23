@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.sw360.datahandler.thrift.SW360Exception;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseInfoParsingResult;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.OutputFormatVariant;
+import org.eclipse.sw360.datahandler.thrift.projects.Project;
 
 import java.util.Collection;
 
@@ -33,7 +34,10 @@ public class XhtmlGenerator extends OutputGenerator<String> {
     }
 
     @Override
-    public String generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, String projectName, String projectVersion, String licenseInfoHeaderText) throws SW360Exception {
+    public String generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, String licenseInfoHeaderText) throws SW360Exception {
+        String projectName = project.getName();
+        String projectVersion = project.getVersion();
+
         switch (getOutputVariant()) {
             case DISCLOSURE:
                 return generateDisclosure(projectLicenseInfoResults, projectName + " " + projectVersion, licenseInfoHeaderText);

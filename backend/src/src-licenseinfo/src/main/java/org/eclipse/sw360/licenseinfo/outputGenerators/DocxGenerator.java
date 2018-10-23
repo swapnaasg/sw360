@@ -24,6 +24,7 @@ import org.eclipse.sw360.datahandler.thrift.licenseinfo.*;
 import org.eclipse.sw360.datahandler.thrift.licenses.License;
 import org.eclipse.sw360.datahandler.thrift.licenses.LicenseService;
 import org.eclipse.sw360.datahandler.thrift.licenses.Todo;
+import org.eclipse.sw360.datahandler.thrift.projects.Project;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,7 +50,10 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
     }
 
     @Override
-    public byte[] generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, String projectName, String projectVersion, String licenseInfoHeaderText) throws SW360Exception {
+    public byte[] generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, String licenseInfoHeaderText) throws SW360Exception {
+        String projectName = project.getName();
+        String projectVersion = project.getVersion();
+
         ByteArrayOutputStream docxOutputStream = new ByteArrayOutputStream();
         Optional<byte[]> docxTemplateFile;
         XWPFDocument xwpfDocument;
@@ -59,7 +63,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                     docxTemplateFile = CommonUtils.loadResource(DocxGenerator.class, DOCX_TEMPLATE_FILE);
                     xwpfDocument = new XWPFDocument(new ByteArrayInputStream(docxTemplateFile.get()));
                     if (docxTemplateFile.isPresent()) {
-                        fillDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, false);
+                        fillDisclosureDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, false);
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_FILE);
                     }
@@ -68,7 +72,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                     docxTemplateFile = CommonUtils.loadResource(DocxGenerator.class, DOCX_TEMPLATE_REPORT_FILE);
                     xwpfDocument = new XWPFDocument(new ByteArrayInputStream(docxTemplateFile.get()));
                     if (docxTemplateFile.isPresent()) {
-                        fillDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, true);
+                        fillReportDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, true);
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_REPORT_FILE);
                     }
@@ -88,7 +92,17 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
         return docxOutputStream.toByteArray();
     }
 
-    private void fillDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
+    private void fillDisclosureDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
+                              String projectName, String projectVersion, String licenseInfoHeaderText, boolean includeObligations) throws XmlException, TException {
+        replaceText(document, "$license-info-header", licenseInfoHeaderText);
+        replaceText(document, "$project-name", projectName);
+        replaceText(document, "$project-version", projectVersion);
+        fillReleaseBulletList(document, projectLicenseInfoResults);
+        fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
+        fillLicenseList(document, projectLicenseInfoResults);
+    }
+
+    private void fillReportDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
                               String projectName, String projectVersion, String licenseInfoHeaderText, boolean includeObligations) throws XmlException, TException {
         replaceText(document, "$license-info-header", licenseInfoHeaderText);
         replaceText(document, "$project-name", projectName);
