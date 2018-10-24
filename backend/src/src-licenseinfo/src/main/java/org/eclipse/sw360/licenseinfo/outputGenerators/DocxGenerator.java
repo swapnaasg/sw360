@@ -120,16 +120,17 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
     }
 
     private void fillAttendeesTable(XWPFDocument document, Project project) throws XmlException, TException {
-        XWPFTable table = document.createTable();
+        XWPFTable table = document.getTables().get(0);
 
-        XWPFTableRow headers = table.createRow();
-        XWPFTableCell c1 = headers.createCell();
-        c1.setText("Name");
-        XWPFTableCell c2 = headers.createCell();
-        c2.setText("Department");
-        XWPFTableCell c3 = headers.createCell();
-        c3.setText("Role");
-        document.setTable(1, table);
+        int currentRow = 6;
+
+        if(project.isSetProjectOwner()) {
+            XWPFTableRow row = table.insertNewTableRow(currentRow++);
+            String owner =  project.getProjectOwner();
+            row.addNewTableCell().setText(owner);
+            row.addNewTableCell().setText("Department");
+            row.addNewTableCell().setText("Owner");
+        }
     }
 
     private void fillReleaseBulletList(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults) throws XmlException {
