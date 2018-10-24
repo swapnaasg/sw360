@@ -15,6 +15,9 @@ package org.eclipse.sw360.licenseinfo.outputGenerators;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.thrift.TException;
 import org.apache.xmlbeans.XmlException;
 import org.eclipse.sw360.datahandler.common.CommonUtils;
@@ -72,7 +75,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                     docxTemplateFile = CommonUtils.loadResource(DocxGenerator.class, DOCX_TEMPLATE_REPORT_FILE);
                     xwpfDocument = new XWPFDocument(new ByteArrayInputStream(docxTemplateFile.get()));
                     if (docxTemplateFile.isPresent()) {
-                        fillReportDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, true);
+                        fillReportDocument(xwpfDocument, projectLicenseInfoResults, project, licenseInfoHeaderText, true);
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_REPORT_FILE);
                     }
@@ -103,13 +106,30 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
     }
 
     private void fillReportDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
-                              String projectName, String projectVersion, String licenseInfoHeaderText, boolean includeObligations) throws XmlException, TException {
+                              Project project, String licenseInfoHeaderText, boolean includeObligations) throws XmlException, TException {
+        String projectName = project.getName();
+        String projectVersion = project.getVersion();
+
         replaceText(document, "$license-info-header", licenseInfoHeaderText);
         replaceText(document, "$project-name", projectName);
         replaceText(document, "$project-version", projectVersion);
+        fillAttendeesTable(document, project);
         fillReleaseBulletList(document, projectLicenseInfoResults);
         fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
         fillLicenseList(document, projectLicenseInfoResults);
+    }
+
+    private void fillAttendeesTable(XWPFDocument document, Project project) throws XmlException, TException {
+        XWPFTable table = document.createTable();
+
+        XWPFTableRow headers = table.createRow();
+        XWPFTableCell c1 = headers.createCell();
+        c1.setText("Name");
+        XWPFTableCell c2 = headers.createCell();
+        c2.setText("Department");
+        XWPFTableCell c3 = headers.createCell();
+        c3.setText("Role");
+        document.setTable(1, table);
     }
 
     private void fillReleaseBulletList(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults) throws XmlException {
