@@ -53,7 +53,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
     }
 
     @Override
-    public byte[] generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, String licenseInfoHeaderText) throws SW360Exception {
+    public byte[] generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, String licenseInfoHeaderText, String clearingSummaryText) throws SW360Exception {
         String projectName = project.getName();
         String projectVersion = project.getVersion();
 

@@ -119,7 +119,9 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
 
         licenseInfoFile.setOutputFormatInfo(generator.getOutputFormatInfo());
         String licenseInfoHeaderText = (project.isSetLicenseInfoHeaderText()) ? project.getLicenseInfoHeaderText() : getDefaultLicenseInfoHeaderText();
-        Object output = generator.generateOutputFile(projectLicenseInfoResults, project, licenseInfoHeaderText);
+        String clearingSummaryText = (project.isSetClearingSummaryText()) ? project.getClearingSummaryText() : getDefaultClearingSummaryText();
+
+        Object output = generator.generateOutputFile(projectLicenseInfoResults, project, licenseInfoHeaderText, clearingSummaryText);
         if (output instanceof byte[]) {
             licenseInfoFile.setGeneratedOutput((byte[]) output);
         } else if (output instanceof String) {

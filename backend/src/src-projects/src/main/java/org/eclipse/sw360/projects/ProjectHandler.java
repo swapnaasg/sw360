@@ -276,15 +276,15 @@ public class ProjectHandler implements ProjectService.Iface {
         return handler.checkIfInUse(projectId);
     }
 
-    @Override
+/*     @Override
     public String getDefaultClearingSummaryText() {
         final LicenseInfoService.Iface licenseInfoClient = new ThriftClients().makeLicenseInfoClient();
         try {
-            String defaultLicenseInfoHeaderText = licenseInfoClient.getDefaultClearingSummaryText();
-            return defaultLicenseInfoHeaderText;
+            String defaultClearingSummaryText = licenseInfoClient.getDefaultClearingSummaryText();
+            return defaultClearingSummaryText;
         } catch (TException e) {
             log.error("Could not load default license info header text from backend.", e);
             return "";
         }
-    }
+    } */
 }

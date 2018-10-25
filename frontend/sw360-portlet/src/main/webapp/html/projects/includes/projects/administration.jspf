@@ -95,11 +95,25 @@
     </tr>
 </table>
 
+<table class="table info_table" id="ClearingSummary" title="Clearing Summary">
+    <thead>
+    <tr>
+        <th class="headlabel">Clearing Summary</th>
+    </tr>
+    </thead>
+    <tr>
+        <td>
+            <textarea class="projectClearingSummaryText" id="clearingSummaryText" readonly><sw360:DisplayClearingSummary project="${project}" defaultText="${defaultClearingSummaryText}"/></textarea>
+        </td>
+    </tr>
+</table>
+
 <script>
     require(['jquery'], function($) {
 
         Liferay.on('allPortletsReady', function() {
             $('#licenseInfoHeaderText').height($('#licenseInfoHeaderText').prop('scrollHeight'));
+            $('#clearingSummaryText').height($('#clearingSummaryText').prop('scrollHeight'));
         });
 
     });

@@ -11,7 +11,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package org.eclipse.sw360.licenseinfo.outputGenerators;
-
+import org.eclipse.sw360.datahandler.thrift.projects.Project;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.*;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -124,10 +124,14 @@ public class XhtmlGeneratorTest {
 
         xhtmlGenerator = new XhtmlGenerator(OutputFormatVariant.DISCLOSURE, "License Disclosure as XHTML");
 
-        xmlString = xhtmlGenerator.generateOutputFile(lipresults, "myproject", "1.0", "Lorem Ipsum");
-        xmlString2 = xhtmlGenerator.generateOutputFile(lipresults2, "myproject", "1.0", "Lorem Ipsum");
-        xmlString3 = xhtmlGenerator.generateOutputFile(lipresults3, "myproject", "1.0", "Lorem Ipsum");
-        xmlStringEmpty = xhtmlGenerator.generateOutputFile(lipresultsEmpty, "myproject", "1.0", "Lorem Ipsum");
+        Project p = new Project();
+        p.setName("myproject");
+        p.setVersion("1.0");
+
+        xmlString = xhtmlGenerator.generateOutputFile(lipresults, p, "Lorem", "Ipsum");
+        xmlString2 = xhtmlGenerator.generateOutputFile(lipresults2, p, "Lorem","Ipsum");
+        xmlString3 = xhtmlGenerator.generateOutputFile(lipresults3, p, "Lorem", "Ipsum");
+        xmlStringEmpty = xhtmlGenerator.generateOutputFile(lipresultsEmpty, p, "Lorem","Ipsum");
 
         generateDocumentsFromXml();
     }

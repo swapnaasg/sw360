@@ -34,21 +34,21 @@ public class XhtmlGenerator extends OutputGenerator<String> {
     }
 
     @Override
-    public String generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, String licenseInfoHeaderText) throws SW360Exception {
+    public String generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, String licenseInfoHeaderText, String clearingSummaryText) throws SW360Exception {
         String projectName = project.getName();
         String projectVersion = project.getVersion();
 
         switch (getOutputVariant()) {
             case DISCLOSURE:
-                return generateDisclosure(projectLicenseInfoResults, projectName + " " + projectVersion, licenseInfoHeaderText);
+                return generateDisclosure(projectLicenseInfoResults, projectName + " " + projectVersion, licenseInfoHeaderText, clearingSummaryText);
             default:
                 throw new IllegalArgumentException("Unknown generator variant type: " + getOutputVariant());
         }
     }
 
-    private String generateDisclosure(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, String projectTitle, String licenseInfoHeaderText) {
+    private String generateDisclosure(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, String projectTitle, String licenseInfoHeaderText, String clearingSummaryText) {
         try {
-            return renderTemplateWithDefaultValues(projectLicenseInfoResults, XHTML_TEMPLATE_FILE, projectTitle, convertHeaderTextToHTML(licenseInfoHeaderText));
+            return renderTemplateWithDefaultValues(projectLicenseInfoResults, XHTML_TEMPLATE_FILE, projectTitle, convertHeaderTextToHTML(licenseInfoHeaderText), convertHeaderTextToHTML(clearingSummaryText));
         } catch (Exception e) {
             LOGGER.error("Could not generate xhtml license info file for project " + projectTitle, e);
             return "License information could not be generated.\nAn exception occured: " + e.toString();

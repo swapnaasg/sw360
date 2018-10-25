@@ -91,6 +91,16 @@ public class ProjectPortletUtils {
                     }
                     break;
 
+                case CLEARING_SUMMARY_TEXT:
+                    // if `CLEARING_SUMMARY_TEXT` is not in the request then we want this to be unset in the `project`
+                    String clearingSummary = request.getParameter(field.toString());
+                    if(clearingSummary == null) {
+                        project.unsetClearingSummaryText();
+                    } else {
+                        project.setClearingSummaryText(StringEscapeUtils.unescapeHtml(clearingSummary));
+                    }
+                    break;
+
                 case ROLES:
                     project.setRoles(PortletUtils.getCustomMapFromRequest(request));
                     break;

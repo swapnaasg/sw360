@@ -116,6 +116,20 @@
 </table>
 <input id="setToDefaultLicenseInfoHeaderTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
 
+<table class="table info_table" id="ClearingSummary" title="Clearing Summary">
+    <thead>
+    <tr>
+        <th class="headlabel">Clearing Summary</th>
+    </tr>
+    </thead>
+    <tr>
+        <td>
+            <textarea name="<portlet:namespace/><%=Project._Fields.CLEARING_SUMMARY_TEXT%>" class="projectCLearingSummaryText" id="clearingSummaryText" data-defaulttext="${defaultClearingSummaryText}"><sw360:DisplayClearingSummaryHeader project="${project}" defaultText="${defaultClearingSummaryText}"/></textarea>
+        </td>
+    </tr>
+</table>
+<input id="setToDefaultClearingSummaryTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
+
 <script>
     require(['jquery', /* jquery-plugins */ 'jquery-ui'], function($) {
 
