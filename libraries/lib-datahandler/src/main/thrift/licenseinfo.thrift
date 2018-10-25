@@ -101,4 +101,9 @@ service LicenseInfoService {
      */
     string getDefaultLicenseInfoHeaderText();
 
+    /**
+     * get default clearing summary text
+     */
+    string getDefaultClearingSummaryText();
+
 }

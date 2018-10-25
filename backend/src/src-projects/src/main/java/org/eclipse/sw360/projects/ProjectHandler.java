@@ -23,6 +23,8 @@ import org.eclipse.sw360.datahandler.thrift.projects.Project;
 import org.eclipse.sw360.datahandler.thrift.projects.ProjectLink;
 import org.eclipse.sw360.datahandler.thrift.projects.ProjectRelationship;
 import org.eclipse.sw360.datahandler.thrift.projects.ProjectService;
+import org.eclipse.sw360.datahandler.thrift.ThriftClients;
+import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseInfoService;
 import org.eclipse.sw360.datahandler.thrift.users.User;
 
 import java.io.IOException;
@@ -274,4 +276,15 @@ public class ProjectHandler implements ProjectService.Iface {
         return handler.checkIfInUse(projectId);
     }
 
+    @Override
+    public String getDefaultClearingSummaryText() {
+        final LicenseInfoService.Iface licenseInfoClient = new ThriftClients().makeLicenseInfoClient();
+        try {
+            String defaultLicenseInfoHeaderText = licenseInfoClient.getDefaultClearingSummaryText();
+            return defaultLicenseInfoHeaderText;
+        } catch (TException e) {
+            log.error("Could not load default license info header text from backend.", e);
+            return "";
+        }
+    }
 }

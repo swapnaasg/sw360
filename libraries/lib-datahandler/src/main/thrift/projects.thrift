@@ -113,6 +113,7 @@ struct Project {
     46: optional bool enableSvm, // flag for enabling Security Vulnerability Monitoring
     47: optional string licenseInfoHeaderText;
     48: optional bool enableVulnerabilitiesDisplay, // flag for enabling displaying vulnerabilities in project view
+    134: optional string clearingSummary,
 
     // Urls for the project
     50: optional string homepage,
@@ -316,4 +317,9 @@ service ProjectService {
      * external ids can have multiple values to one key
      */
     set<Project> searchByExternalIds(1: map<string, set<string>> externalIds, 2: User user);
+
+    /**
+     * get default clearing summary text
+     */
+    string getDefaultClearingSummaryText();
 }
