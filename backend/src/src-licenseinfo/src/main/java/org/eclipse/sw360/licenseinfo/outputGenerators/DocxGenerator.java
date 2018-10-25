@@ -113,16 +113,25 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
         replaceText(document, "$license-info-header", licenseInfoHeaderText);
         replaceText(document, "$project-name", projectName);
         replaceText(document, "$project-version", projectVersion);
+        fillOwnerGroup(document, project);
         fillAttendeesTable(document, project);
         fillReleaseBulletList(document, projectLicenseInfoResults);
         fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
         fillLicenseList(document, projectLicenseInfoResults);
     }
 
+    private void fillOwnerGroup(XWPFDocument document, Project project) throws XmlException, TException {
+        String ownerGroup = "HELLO";
+        if(project.isSetOwnerGroup()) {
+            ownerGroup = project.getOwnerGroup();
+        }
+        replaceText(document, "$owner-group", ownerGroup);
+    }
+
     private void fillAttendeesTable(XWPFDocument document, Project project) throws XmlException, TException {
         XWPFTable table = document.getTables().get(0);
 
-        int currentRow = 6;
+        int currentRow = 7;
 
         if(project.isSetProjectOwner()) {
             XWPFTableRow row = table.insertNewTableRow(currentRow++);
