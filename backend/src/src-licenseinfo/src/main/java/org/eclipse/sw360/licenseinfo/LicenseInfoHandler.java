@@ -118,10 +118,10 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
         LicenseInfoFile licenseInfoFile = new LicenseInfoFile();
 
         licenseInfoFile.setOutputFormatInfo(generator.getOutputFormatInfo());
-        String licenseInfoHeaderText = (project.isSetLicenseInfoHeaderText()) ? project.getLicenseInfoHeaderText() : getDefaultLicenseInfoHeaderText();
-        String clearingSummaryText = (project.isSetClearingSummaryText()) ? project.getClearingSummaryText() : getDefaultClearingSummaryText();
 
-        Object output = generator.generateOutputFile(projectLicenseInfoResults, project, licenseInfoHeaderText, clearingSummaryText);
+        fillDefaults(project);
+
+        Object output = generator.generateOutputFile(projectLicenseInfoResults, project);
         if (output instanceof byte[]) {
             licenseInfoFile.setGeneratedOutput((byte[]) output);
         } else if (output instanceof String) {
@@ -131,6 +131,15 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
         }
 
         return licenseInfoFile;
+    }
+
+    private void fillDefaults(Project project) {
+        if(!project.isSetLicenseInfoHeaderText()) {
+            project.setLicenseInfoHeaderText(getDefaultLicenseInfoHeaderText());
+        }
+        if(!project.isSetClearingSummaryText()) {
+            project.setClearingSummaryText(getDefaultClearingSummaryText());
+        }
     }
 
     @Override

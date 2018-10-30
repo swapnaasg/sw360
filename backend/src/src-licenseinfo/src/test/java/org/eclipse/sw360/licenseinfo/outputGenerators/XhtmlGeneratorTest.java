@@ -127,11 +127,13 @@ public class XhtmlGeneratorTest {
         Project p = new Project();
         p.setName("myproject");
         p.setVersion("1.0");
+        p.setLicenseInfoHeaderText("Lorem");
+        p.setClearingSummaryText("Ipsum");
 
-        xmlString = xhtmlGenerator.generateOutputFile(lipresults, p, "Lorem", "Ipsum");
-        xmlString2 = xhtmlGenerator.generateOutputFile(lipresults2, p, "Lorem","Ipsum");
-        xmlString3 = xhtmlGenerator.generateOutputFile(lipresults3, p, "Lorem", "Ipsum");
-        xmlStringEmpty = xhtmlGenerator.generateOutputFile(lipresultsEmpty, p, "Lorem","Ipsum");
+        xmlString = xhtmlGenerator.generateOutputFile(lipresults, p);
+        xmlString2 = xhtmlGenerator.generateOutputFile(lipresults2, p);
+        xmlString3 = xhtmlGenerator.generateOutputFile(lipresults3, p);
+        xmlStringEmpty = xhtmlGenerator.generateOutputFile(lipresultsEmpty, p);
 
         generateDocumentsFromXml();
     }
