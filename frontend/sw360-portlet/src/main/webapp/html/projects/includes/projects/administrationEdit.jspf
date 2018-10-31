@@ -54,6 +54,13 @@
                    value="<sw360:out value="${project.preevaluationDeadline}"/>" placeholder="Pre-evaluation date YYYY-MM-DD"/>
         </td>
     </tr>
+    <tr>
+        <td colspan="3">
+            <label class="textlabel stackedLabel" for="clearingSummary">Clearing summary</label>
+            <textarea name="<portlet:namespace/><%=Project._Fields.CLEARING_SUMMARY_TEXT%>" class="projectClearingSummaryText" id="clearingSummaryText" data-defaulttext="${defaultClearingSummaryText}"><sw360:DisplayClearingSummary project="${project}" defaultText="${defaultClearingSummaryText}"/></textarea>
+            <input id="setToDefaultClearingSummaryTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
+        </td>
+    </tr>
 </table>
 
 <table class="table info_table" id="ProjectLifecycleInfo" title="Lifecycle">
@@ -115,20 +122,6 @@
     </tr>
 </table>
 <input id="setToDefaultLicenseInfoHeaderTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
-
-<table class="table info_table" id="ClearingSummary" title="Clearing Summary">
-    <thead>
-    <tr>
-        <th class="headlabel">Clearing Summary</th>
-    </tr>
-    </thead>
-    <tr>
-        <td>
-            <textarea name="<portlet:namespace/><%=Project._Fields.CLEARING_SUMMARY_TEXT%>" class="projectClearingSummaryText" id="clearingSummaryText" data-defaulttext="${defaultClearingSummaryText}"><sw360:DisplayClearingSummary project="${project}" defaultText="${defaultClearingSummaryText}"/></textarea>
-        </td>
-    </tr>
-</table>
-<input id="setToDefaultClearingSummaryTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
 
 <script>
     require(['jquery', /* jquery-plugins */ 'jquery-ui'], function($) {

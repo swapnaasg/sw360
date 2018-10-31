@@ -52,6 +52,12 @@
         <td>Deadline for pre-evaluation:</td>
         <td><sw360:out value="${project.preevaluationDeadline}"/></td>
     </tr>
+    <tr>
+        <td>Clearing summary:</td>
+        <td>
+            <textarea class="projectClearingSummaryText" id="clearingSummaryText" readonly><sw360:DisplayClearingSummary project="${project}" defaultText="${defaultClearingSummaryText}"/></textarea>
+        </td>
+    </tr>
 </table>
 
 <table class="table info_table" id="lifecycle">
@@ -91,19 +97,6 @@
     <tr>
         <td>
             <textarea class="projectLicenseInfoHeaderText" id="licenseInfoHeaderText" readonly><sw360:DisplayLicenseInfoHeader project="${project}" defaultText="${defaultLicenseInfoHeaderText}"/></textarea>
-        </td>
-    </tr>
-</table>
-
-<table class="table info_table" id="ClearingSummary" title="Clearing Summary">
-    <thead>
-    <tr>
-        <th class="headlabel">Clearing Summary</th>
-    </tr>
-    </thead>
-    <tr>
-        <td>
-            <textarea class="projectClearingSummaryText" id="clearingSummaryText" readonly><sw360:DisplayClearingSummary project="${project}" defaultText="${defaultClearingSummaryText}"/></textarea>
         </td>
     </tr>
 </table>
