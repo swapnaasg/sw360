@@ -114,6 +114,14 @@ struct Project {
     47: optional string licenseInfoHeaderText;
     48: optional bool enableVulnerabilitiesDisplay, // flag for enabling displaying vulnerabilities in project view
     134: optional string obligationsText,
+    135: optional string clearingSummary,
+    136: optional string specialRisksOSS,
+    137: optional string generalRisks3rdParty,
+    138: optional string specialRisks3rdParty,
+    139: optional string deliveryChannels,
+    140: optional string remarksAdditonalRequirements,
+
+
 
     // Urls for the project
     50: optional string homepage,

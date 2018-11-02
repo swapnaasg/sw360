@@ -93,11 +93,11 @@ public class ProjectPortletUtils {
 
                 case OBLIGATIONS_TEXT:
                     // if `OBLIGATIONS_TEXT` is not in the request then we want this to be unset in the `project`
-                    String clearingSummary = request.getParameter(field.toString());
-                    if(clearingSummary == null) {
+                    String obligationsText = request.getParameter(field.toString());
+                    if(obligationsText == null) {
                         project.unsetObligationsText();
                     } else {
-                        project.setObligationsText(StringEscapeUtils.unescapeHtml(clearingSummary));
+                        project.setObligationsText(StringEscapeUtils.unescapeHtml(obligationsText));
                     }
                     break;
 
