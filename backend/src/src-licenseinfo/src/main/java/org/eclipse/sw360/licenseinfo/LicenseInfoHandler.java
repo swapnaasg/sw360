@@ -54,8 +54,8 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
     private static final int CACHE_MAX_ITEMS = 100;
     private static final String DEFAULT_LICENSE_INFO_HEADER_FILE="/DefaultLicenseInfoHeader.txt";
     private static final String DEFAULT_LICENSE_INFO_TEXT = loadDefaultLicenseInfoHeaderText();
-    private static final String DEFAULT_CLEARING_SUMMARY_FILE="/DefaultClearingSummary.txt";
-    private static final String DEFAULT_CLEARING_SUMMARY_TEXT = loadDefaultClearingSummaryText();
+    private static final String DEFAULT_CLEARING_SUMMARY_FILE="/DefaultObligations.txt";
+    private static final String DEFAULT_OBLIGATIONS_TEXT = loadDefaultObligationsText();
     public static final String MSG_NO_RELEASE_GIVEN = "No release given";
 
     protected List<LicenseInfoParser> parsers;
@@ -137,8 +137,8 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
         if(!project.isSetLicenseInfoHeaderText()) {
             project.setLicenseInfoHeaderText(getDefaultLicenseInfoHeaderText());
         }
-        if(!project.isSetClearingSummaryText()) {
-            project.setClearingSummaryText(getDefaultClearingSummaryText());
+        if(!project.isSetObligationsText()) {
+            project.setObligationsText(getDefaultObligationsText());
         }
     }
 
@@ -215,8 +215,8 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
     }
 
     @Override
-    public String getDefaultClearingSummaryText() {
-        return DEFAULT_CLEARING_SUMMARY_TEXT;
+    public String getDefaultObligationsText() {
+        return DEFAULT_OBLIGATIONS_TEXT;
     }
 
     protected Map<Release, Set<String>> mapKeysToReleases(Map<String, Set<String>> releaseIdsToAttachmentIds, User user) throws TException {
@@ -325,9 +325,9 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
             return defaultLicenseInfoHeader;
     }
 
-    private static String loadDefaultClearingSummaryText(){
-        String defaultClearingSummaryText = new String( CommonUtils.loadResource(LicenseInfoHandler.class, DEFAULT_CLEARING_SUMMARY_FILE).orElse(new byte[0]) );
-        defaultClearingSummaryText = defaultClearingSummaryText.replaceAll("(?m)^#.*\\n", "");  // ignore comments in template file
-        return defaultClearingSummaryText;
+    private static String loadDefaultObligationsText(){
+        String defaultObligationsText = new String( CommonUtils.loadResource(LicenseInfoHandler.class, DEFAULT_CLEARING_SUMMARY_FILE).orElse(new byte[0]) );
+        defaultObligationsText = defaultObligationsText.replaceAll("(?m)^#.*\\n", "");  // ignore comments in template file
+        return defaultObligationsText;
     }
 }

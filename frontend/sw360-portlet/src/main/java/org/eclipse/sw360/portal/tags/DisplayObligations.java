@@ -17,7 +17,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
 import java.io.IOException;
 
-public class DisplayClearingSummary extends SimpleTagSupport {
+public class DisplayObligations extends SimpleTagSupport {
 
     private Project project;
     private String defaultText = "";
@@ -32,7 +32,7 @@ public class DisplayClearingSummary extends SimpleTagSupport {
 
 
     public void doTag() throws JspException, IOException {
-        String output = project.isSetClearingSummaryText() ? StringEscapeUtils.escapeHtml(project.clearingSummaryText) : StringEscapeUtils.escapeHtml(defaultText);
+        String output = project.isSetObligationsText() ? StringEscapeUtils.escapeHtml(project.obligationsText) : StringEscapeUtils.escapeHtml(defaultText);
 
         getJspContext().getOut().print(output);
     }

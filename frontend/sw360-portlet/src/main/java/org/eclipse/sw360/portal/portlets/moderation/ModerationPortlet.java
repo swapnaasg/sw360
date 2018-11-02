@@ -493,7 +493,7 @@ public class ModerationPortlet extends FossologyAwarePortlet {
             is_used = client.projectIsUsed(actual_project.getId());
             request.setAttribute(PortalConstants.ACTUAL_PROJECT, actual_project);
             request.setAttribute(PortalConstants.DEFAULT_LICENSE_INFO_HEADER_TEXT, getDefaultLicenseInfoHeaderText());
-            request.setAttribute(PortalConstants.DEFAULT_CLEARING_SUMMARY_TEXT, getDefaultClearingSummaryText());
+            request.setAttribute(PortalConstants.DEFAULT_OBLIGATIONS_TEXT, getDefaultObligationsText());
         } catch (TException e) {
             log.error("Could not retrieve project", e);
         }
@@ -604,11 +604,11 @@ public class ModerationPortlet extends FossologyAwarePortlet {
         }
     }
 
-    private String getDefaultClearingSummaryText() {
+    private String getDefaultObligationsText() {
         final LicenseInfoService.Iface licenseInfoClient = thriftClients.makeLicenseInfoClient();
         try {
-            String defaultClearingSummaryText = licenseInfoClient.getDefaultClearingSummaryText();
-            return defaultClearingSummaryText;
+            String defaultObligationsText = licenseInfoClient.getDefaultObligationsText();
+            return defaultObligationsText;
         } catch (TException e) {
             log.error("Could not load default clearing summary text from backend.", e);
             return "";

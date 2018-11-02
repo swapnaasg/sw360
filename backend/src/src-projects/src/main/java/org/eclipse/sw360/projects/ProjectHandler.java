@@ -277,11 +277,11 @@ public class ProjectHandler implements ProjectService.Iface {
     }
 
 /*     @Override
-    public String getDefaultClearingSummaryText() {
+    public String getDefaultObligationsText() {
         final LicenseInfoService.Iface licenseInfoClient = new ThriftClients().makeLicenseInfoClient();
         try {
-            String defaultClearingSummaryText = licenseInfoClient.getDefaultClearingSummaryText();
-            return defaultClearingSummaryText;
+            String defaultObligationsText = licenseInfoClient.getDefaultObligationsText();
+            return defaultObligationsText;
         } catch (TException e) {
             log.error("Could not load default license info header text from backend.", e);
             return "";

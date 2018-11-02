@@ -836,7 +836,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         request.setAttribute(DOCUMENT_TYPE, SW360Constants.TYPE_PROJECT);
         request.setAttribute(DOCUMENT_ID, id);
         request.setAttribute(DEFAULT_LICENSE_INFO_HEADER_TEXT, getProjectDefaultLicenseInfoHeaderText());
-        request.setAttribute(DEFAULT_CLEARING_SUMMARY_TEXT, getProjectDefaultClearingSummaryText());
+        request.setAttribute(DEFAULT_OBLIGATIONS_TEXT, getProjectDefaultObligationsText());
         if (id != null) {
             try {
                 ProjectService.Iface client = thriftClients.makeProjectClient();
@@ -1058,7 +1058,7 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         Set<Project> usingProjects;
         int allUsingProjectCount = 0;
         request.setAttribute(DEFAULT_LICENSE_INFO_HEADER_TEXT, getProjectDefaultLicenseInfoHeaderText());
-        request.setAttribute(DEFAULT_CLEARING_SUMMARY_TEXT, getProjectDefaultClearingSummaryText());
+        request.setAttribute(DEFAULT_OBLIGATIONS_TEXT, getProjectDefaultObligationsText());
 
         if (id != null) {
 
@@ -1264,11 +1264,11 @@ public class ProjectPortlet extends FossologyAwarePortlet {
         }
     }
 
-    private String getProjectDefaultClearingSummaryText() {
+    private String getProjectDefaultObligationsText() {
         final LicenseInfoService.Iface licenseInfoClient = thriftClients.makeLicenseInfoClient();
         try {
-            String defaultClearingSummaryText = licenseInfoClient.getDefaultClearingSummaryText();
-            return defaultClearingSummaryText;
+            String defaultObligationsText = licenseInfoClient.getDefaultObligationsText();
+            return defaultObligationsText;
         } catch (TException e) {
             log.error("Could not load default license info header text from backend.", e);
             return "";

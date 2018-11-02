@@ -1,0 +1,3 @@
+All superordinated products have to:
+    - Include the contents of the Readme_OSS / commercial 3rd party software with all required license texts and copyright notices and acknowledgments in the delivery of the product. The ReadMe_OSS has to be delivered in a way that a user can easily find it.
+    - Need to be able to ship the source code of all components licensed under a license which requires this. The build files have to be delivered too.

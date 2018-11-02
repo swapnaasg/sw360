@@ -91,13 +91,13 @@ public class ProjectPortletUtils {
                     }
                     break;
 
-                case CLEARING_SUMMARY_TEXT:
-                    // if `CLEARING_SUMMARY_TEXT` is not in the request then we want this to be unset in the `project`
+                case OBLIGATIONS_TEXT:
+                    // if `OBLIGATIONS_TEXT` is not in the request then we want this to be unset in the `project`
                     String clearingSummary = request.getParameter(field.toString());
                     if(clearingSummary == null) {
-                        project.unsetClearingSummaryText();
+                        project.unsetObligationsText();
                     } else {
-                        project.setClearingSummaryText(StringEscapeUtils.unescapeHtml(clearingSummary));
+                        project.setObligationsText(StringEscapeUtils.unescapeHtml(clearingSummary));
                     }
                     break;
 

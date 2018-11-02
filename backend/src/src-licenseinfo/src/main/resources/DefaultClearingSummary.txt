@@ -1,1 +1,0 @@
-The product clearing of UAA 4.19.2 is based on the clearing report of the predecessor UAA 3.20.  The ReadME_OSS contains all for UAA 4.19.2 relevant license texts, acknowledgements and copyrights that we know of. It further implements all documentation requirements of the different OSS licenses

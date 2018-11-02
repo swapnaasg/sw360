@@ -56,9 +56,9 @@
     </tr>
     <tr>
         <td colspan="3">
-            <label class="textlabel stackedLabel" for="clearingSummary">Clearing summary</label>
-            <textarea name="<portlet:namespace/><%=Project._Fields.CLEARING_SUMMARY_TEXT%>" class="projectClearingSummaryText" id="clearingSummaryText" data-defaulttext="${defaultClearingSummaryText}"><sw360:DisplayClearingSummary project="${project}" defaultText="${defaultClearingSummaryText}"/></textarea>
-            <input id="setToDefaultClearingSummaryTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
+            <label class="textlabel stackedLabel" for="clearingSummary">Obligations</label>
+            <textarea name="<portlet:namespace/><%=Project._Fields.OBLIGATIONS_TEXT%>" class="projectObligationsText" id="obligationsText" data-defaulttext="${defaultObligationsText}"><sw360:DisplayObligations project="${project}" defaultText="${defaultObligationsText}"/></textarea>
+            <input id="setToDefaultObligationsTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
         </td>
     </tr>
 </table>
@@ -129,20 +129,20 @@
         Liferay.on('allPortletsReady', function() {
             <core_rt:if test="${addMode}" >
             setDefaultLicenseInfoHeaderText();
-            setDefaultClearingSummaryText();
+            setDefaultObligationsText();
             </core_rt:if>
 
             $('.projectLicenseInfoHeaderText').each(function() {
                 $(this).height($(this).prop('scrollHeight'));
             });
 
-            $('.projectClearingSummaryText').each(function() {
+            $('.projectObligationsText').each(function() {
                 $(this).height($(this).prop('scrollHeight'));
             });
 
             $('#setToDefaultLicenseInfoHeaderTextButton').on('click', setDefaultLicenseInfoHeaderText);
 
-            $('#setToDefaultClearingSummaryTextButton').on('click', setDefaultClearingSummaryText);
+            $('#setToDefaultObligationsTextButton').on('click', setDefaultObligationsText);
 
             $('.datepicker').datepicker({dateFormat: "yy-mm-dd"});
         });
@@ -151,8 +151,8 @@
            $('#licenseInfoHeaderText').val($('#licenseInfoHeaderText').data("defaulttext"));
        }
 
-        function setDefaultClearingSummaryText() {
-           $('#clearingSummaryText').val($('#clearingSummaryText').data("defaulttext"));
+        function setDefaultObligationsText() {
+           $('#obligationsText').val($('#obligationsText').data("defaulttext"));
        }
 
     });

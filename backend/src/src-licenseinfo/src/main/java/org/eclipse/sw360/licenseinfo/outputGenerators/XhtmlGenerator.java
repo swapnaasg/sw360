@@ -38,19 +38,19 @@ public class XhtmlGenerator extends OutputGenerator<String> {
         String projectName = project.getName();
         String projectVersion = project.getVersion();
         String licenseInfoHeaderText = project.getLicenseInfoHeaderText();
-        String clearingSummaryText = project.getClearingSummaryText();
+        String obligationsText = project.getObligationsText();
 
         switch (getOutputVariant()) {
             case DISCLOSURE:
-                return generateDisclosure(projectLicenseInfoResults, projectName + " " + projectVersion, licenseInfoHeaderText, clearingSummaryText);
+                return generateDisclosure(projectLicenseInfoResults, projectName + " " + projectVersion, licenseInfoHeaderText, obligationsText);
             default:
                 throw new IllegalArgumentException("Unknown generator variant type: " + getOutputVariant());
         }
     }
 
-    private String generateDisclosure(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, String projectTitle, String licenseInfoHeaderText, String clearingSummaryText) {
+    private String generateDisclosure(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, String projectTitle, String licenseInfoHeaderText, String obligationsText) {
         try {
-            return renderTemplateWithDefaultValues(projectLicenseInfoResults, XHTML_TEMPLATE_FILE, projectTitle, convertHeaderTextToHTML(licenseInfoHeaderText), convertHeaderTextToHTML(clearingSummaryText));
+            return renderTemplateWithDefaultValues(projectLicenseInfoResults, XHTML_TEMPLATE_FILE, projectTitle, convertHeaderTextToHTML(licenseInfoHeaderText), convertHeaderTextToHTML(obligationsText));
         } catch (Exception e) {
             LOGGER.error("Could not generate xhtml license info file for project " + projectTitle, e);
             return "License information could not be generated.\nAn exception occured: " + e.toString();

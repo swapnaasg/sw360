@@ -128,7 +128,7 @@ public class XhtmlGeneratorTest {
         p.setName("myproject");
         p.setVersion("1.0");
         p.setLicenseInfoHeaderText("Lorem");
-        p.setClearingSummaryText("Ipsum");
+        p.setObligationsText("Ipsum");
 
         xmlString = xhtmlGenerator.generateOutputFile(lipresults, p);
         xmlString2 = xhtmlGenerator.generateOutputFile(lipresults2, p);

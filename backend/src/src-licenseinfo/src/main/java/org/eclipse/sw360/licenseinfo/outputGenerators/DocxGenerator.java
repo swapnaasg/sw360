@@ -57,7 +57,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
         String projectName = project.getName();
         String projectVersion = project.getVersion();
         String licenseInfoHeaderText = project.getLicenseInfoHeaderText();
-        String clearingSummaryText = project.getClearingSummaryText();
+        String obligationsText = project.getObligationsText();
 
         ByteArrayOutputStream docxOutputStream = new ByteArrayOutputStream();
         Optional<byte[]> docxTemplateFile;
@@ -68,7 +68,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                     docxTemplateFile = CommonUtils.loadResource(DocxGenerator.class, DOCX_TEMPLATE_FILE);
                     xwpfDocument = new XWPFDocument(new ByteArrayInputStream(docxTemplateFile.get()));
                     if (docxTemplateFile.isPresent()) {
-                        fillDisclosureDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, clearingSummaryText, false);
+                        fillDisclosureDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, obligationsText, false);
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_FILE);
                     }
@@ -77,7 +77,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                     docxTemplateFile = CommonUtils.loadResource(DocxGenerator.class, DOCX_TEMPLATE_REPORT_FILE);
                     xwpfDocument = new XWPFDocument(new ByteArrayInputStream(docxTemplateFile.get()));
                     if (docxTemplateFile.isPresent()) {
-                        fillReportDocument(xwpfDocument, projectLicenseInfoResults, project, licenseInfoHeaderText, clearingSummaryText, true);
+                        fillReportDocument(xwpfDocument, projectLicenseInfoResults, project, licenseInfoHeaderText, obligationsText, true);
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_REPORT_FILE);
                     }
@@ -98,25 +98,25 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
     }
 
     private void fillDisclosureDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
-                              String projectName, String projectVersion, String licenseInfoHeaderText, String clearingSummaryText, boolean includeObligations) throws XmlException, TException {
+                              String projectName, String projectVersion, String licenseInfoHeaderText, String obligationsText, boolean includeObligations) throws XmlException, TException {
         replaceText(document, "$license-info-header", licenseInfoHeaderText);
         replaceText(document, "$project-name", projectName);
         replaceText(document, "$project-version", projectVersion);
-        replaceText(document, "$clearing-summary-text", clearingSummaryText);
+        replaceText(document, "$obligations-text", obligationsText);
         fillReleaseBulletList(document, projectLicenseInfoResults);
         fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
         fillLicenseList(document, projectLicenseInfoResults);
     }
 
     private void fillReportDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
-                              Project project, String licenseInfoHeaderText, String clearingSummaryText, boolean includeObligations) throws XmlException, TException {
+                              Project project, String licenseInfoHeaderText, String obligationsText, boolean includeObligations) throws XmlException, TException {
         String projectName = project.getName();
         String projectVersion = project.getVersion();
 
         replaceText(document, "$license-info-header", licenseInfoHeaderText);
         replaceText(document, "$project-name", projectName);
         replaceText(document, "$project-version", projectVersion);
-        replaceText(document, "$clearing-summary-text", clearingSummaryText);
+        replaceText(document, "$obligations-text", obligationsText);
         fillOwnerGroup(document, project);
         fillAttendeesTable(document, project);
         fillReleaseBulletList(document, projectLicenseInfoResults);

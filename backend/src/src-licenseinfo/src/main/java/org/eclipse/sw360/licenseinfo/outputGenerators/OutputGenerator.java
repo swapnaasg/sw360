@@ -45,7 +45,7 @@ public abstract class OutputGenerator<T> {
     protected static final String LICENSE_INFO_RESULTS_CONTEXT_PROPERTY = "licenseInfoResults";
     protected static final String LICENSE_INFO_ERROR_RESULTS_CONTEXT_PROPERTY = "licenseInfoErrorResults";
     protected static final String LICENSE_INFO_HEADER_TEXT = "licenseInfoHeader";
-    protected static final String CLEARING_SUMMARY_TEXT = "licenseInfoHeader";
+    protected static final String OBLIGATIONS_TEXT = "licenseInfoHeader";
     protected static final String LICENSE_INFO_PROJECT_TITLE = "projectTitle";
 
     private final String outputType;
@@ -224,12 +224,12 @@ public abstract class OutputGenerator<T> {
      * @return rendered template
      */
     protected String renderTemplateWithDefaultValues(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, String file,
-                                                     String projectTitle, String licenseInfoHeaderText, String clearingSummaryText) {
+                                                     String projectTitle, String licenseInfoHeaderText, String obligationsText) {
         VelocityContext vc = getConfiguredVelocityContext();
         // set header
         vc.put(LICENSE_INFO_PROJECT_TITLE, projectTitle);
         vc.put(LICENSE_INFO_HEADER_TEXT, licenseInfoHeaderText);
-        vc.put(CLEARING_SUMMARY_TEXT, clearingSummaryText);
+        vc.put(OBLIGATIONS_TEXT, obligationsText);
 
         // sorted lists of all license to be displayed at the end of the file at once
         List<LicenseNameWithText> licenseNamesWithTexts = getSortedLicenseNameWithTexts(projectLicenseInfoResults);
