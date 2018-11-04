@@ -119,9 +119,7 @@ struct Project {
     137: optional string generalRisks3rdParty,
     138: optional string specialRisks3rdParty,
     139: optional string deliveryChannels,
-    140: optional string remarksAdditonalRequirements,
-
-
+    140: optional string remarksAdditionalRequirements,
 
     // Urls for the project
     50: optional string homepage,

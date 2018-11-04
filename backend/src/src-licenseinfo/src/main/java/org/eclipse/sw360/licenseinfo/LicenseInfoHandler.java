@@ -54,7 +54,7 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
     private static final int CACHE_MAX_ITEMS = 100;
     private static final String DEFAULT_LICENSE_INFO_HEADER_FILE="/DefaultLicenseInfoHeader.txt";
     private static final String DEFAULT_LICENSE_INFO_TEXT = loadDefaultLicenseInfoHeaderText();
-    private static final String DEFAULT_CLEARING_SUMMARY_FILE="/DefaultObligations.txt";
+    private static final String DEFAULT_OBLIGATIONS_FILE="/DefaultObligations.txt";
     private static final String DEFAULT_OBLIGATIONS_TEXT = loadDefaultObligationsText();
     public static final String MSG_NO_RELEASE_GIVEN = "No release given";
 
@@ -320,13 +320,13 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
     }
 
     private static String loadDefaultLicenseInfoHeaderText(){
-            String defaultLicenseInfoHeader = new String( CommonUtils.loadResource(LicenseInfoHandler.class, DEFAULT_LICENSE_INFO_HEADER_FILE).orElse(new byte[0]) );
-            defaultLicenseInfoHeader = defaultLicenseInfoHeader.replaceAll("(?m)^#.*\\n", "");  // ignore comments in template file
-            return defaultLicenseInfoHeader;
+        String defaultLicenseInfoHeader = new String( CommonUtils.loadResource(LicenseInfoHandler.class, DEFAULT_LICENSE_INFO_HEADER_FILE).orElse(new byte[0]) );
+        defaultLicenseInfoHeader = defaultLicenseInfoHeader.replaceAll("(?m)^#.*\\n", "");  // ignore comments in template file
+        return defaultLicenseInfoHeader;
     }
 
     private static String loadDefaultObligationsText(){
-        String defaultObligationsText = new String( CommonUtils.loadResource(LicenseInfoHandler.class, DEFAULT_CLEARING_SUMMARY_FILE).orElse(new byte[0]) );
+        String defaultObligationsText = new String( CommonUtils.loadResource(LicenseInfoHandler.class, DEFAULT_OBLIGATIONS_FILE).orElse(new byte[0]) );
         defaultObligationsText = defaultObligationsText.replaceAll("(?m)^#.*\\n", "");  // ignore comments in template file
         return defaultObligationsText;
     }

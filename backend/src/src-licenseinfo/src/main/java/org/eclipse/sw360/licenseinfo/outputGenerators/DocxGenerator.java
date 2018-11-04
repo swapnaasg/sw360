@@ -58,6 +58,12 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
         String projectVersion = project.getVersion();
         String licenseInfoHeaderText = project.getLicenseInfoHeaderText();
         String obligationsText = project.getObligationsText();
+        String clearingSummaryText = project.getClearingSummary();
+        String specialRisksOSSText = project.getSpecialRisksOSS();
+        String generalRisks3rdPartyText = project.getGeneralRisks3rdParty();
+        String specialRisks3rdPartyText = project.getSpecialRisks3rdParty();
+        String deliveryChannelsText = project.getDeliveryChannels();
+        String remarksAdditionalRequirementsText = project.getRemarksAdditionalRequirements();
 
         ByteArrayOutputStream docxOutputStream = new ByteArrayOutputStream();
         Optional<byte[]> docxTemplateFile;
@@ -68,7 +74,20 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                     docxTemplateFile = CommonUtils.loadResource(DocxGenerator.class, DOCX_TEMPLATE_FILE);
                     xwpfDocument = new XWPFDocument(new ByteArrayInputStream(docxTemplateFile.get()));
                     if (docxTemplateFile.isPresent()) {
-                        fillDisclosureDocument(xwpfDocument, projectLicenseInfoResults, projectName, projectVersion, licenseInfoHeaderText, obligationsText, false);
+                        fillDisclosureDocument(
+                            xwpfDocument,
+                            projectLicenseInfoResults,
+                            project,
+                            licenseInfoHeaderText,
+                            obligationsText,
+                            clearingSummaryText,
+                            specialRisksOSSText,
+                            generalRisks3rdPartyText,
+                            specialRisks3rdPartyText,
+                            deliveryChannelsText,
+                            remarksAdditionalRequirementsText,
+                            false
+                            );
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_FILE);
                     }
@@ -77,7 +96,20 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                     docxTemplateFile = CommonUtils.loadResource(DocxGenerator.class, DOCX_TEMPLATE_REPORT_FILE);
                     xwpfDocument = new XWPFDocument(new ByteArrayInputStream(docxTemplateFile.get()));
                     if (docxTemplateFile.isPresent()) {
-                        fillReportDocument(xwpfDocument, projectLicenseInfoResults, project, licenseInfoHeaderText, obligationsText, true);
+                        fillReportDocument(
+                            xwpfDocument,
+                            projectLicenseInfoResults,
+                            project,
+                            licenseInfoHeaderText,
+                            obligationsText,
+                            clearingSummaryText,
+                            specialRisksOSSText,
+                            generalRisks3rdPartyText,
+                            specialRisks3rdPartyText,
+                            deliveryChannelsText,
+                            remarksAdditionalRequirementsText,
+                            true
+                        );
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_REPORT_FILE);
                     }
@@ -97,31 +129,69 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
         return docxOutputStream.toByteArray();
     }
 
-    private void fillDisclosureDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
-                              String projectName, String projectVersion, String licenseInfoHeaderText, String obligationsText, boolean includeObligations) throws XmlException, TException {
-        replaceText(document, "$license-info-header", licenseInfoHeaderText);
-        replaceText(document, "$project-name", projectName);
-        replaceText(document, "$project-version", projectVersion);
-        replaceText(document, "$obligations-text", obligationsText);
-        fillReleaseBulletList(document, projectLicenseInfoResults);
-        fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
-        fillLicenseList(document, projectLicenseInfoResults);
-    }
+    private void fillDisclosureDocument(
+        XWPFDocument document,
+        Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
+        Project project,
+        String licenseInfoHeaderText,
+        String obligationsText,
+        String clearingSummaryText,
+        String specialRisksOSSText,
+        String generalRisks3rdPartyText,
+        String specialRisks3rdPartyText,
+        String deliveryChannelsText,
+        String remarksAdditionalRequirementsText,
+        boolean includeObligations) throws XmlException, TException {
 
-    private void fillReportDocument(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
-                              Project project, String licenseInfoHeaderText, String obligationsText, boolean includeObligations) throws XmlException, TException {
-        String projectName = project.getName();
-        String projectVersion = project.getVersion();
+            String projectName = project.getName();
+            String projectVersion = project.getVersion();
 
-        replaceText(document, "$license-info-header", licenseInfoHeaderText);
-        replaceText(document, "$project-name", projectName);
-        replaceText(document, "$project-version", projectVersion);
-        replaceText(document, "$obligations-text", obligationsText);
-        fillOwnerGroup(document, project);
-        fillAttendeesTable(document, project);
-        fillReleaseBulletList(document, projectLicenseInfoResults);
-        fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
-        fillLicenseList(document, projectLicenseInfoResults);
+            replaceText(document, "$license-info-header", licenseInfoHeaderText);
+            replaceText(document, "$project-name", projectName);
+            replaceText(document, "$project-version", projectVersion);
+            replaceText(document, "$obligations-text", obligationsText);
+            replaceText(document, "$clearing-summary-text", clearingSummaryText);
+            replaceText(document, "$special-risks-oss-addition-text", specialRisksOSSText);            replaceText(document, "$general-risks-3rd-party-text", generalRisks3rdPartyText);
+            replaceText(document, "$special-risks-3rd-party-text", specialRisks3rdPartyText);
+            replaceText(document, "$delivery-channels-text", deliveryChannelsText);
+            replaceText(document, "$remarks-additional-requirements-text", remarksAdditionalRequirementsText);
+            fillReleaseBulletList(document, projectLicenseInfoResults);
+            fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
+            fillLicenseList(document, projectLicenseInfoResults);
+        }
+
+    private void fillReportDocument(
+        XWPFDocument document,
+        Collection<LicenseInfoParsingResult> projectLicenseInfoResults,
+        Project project,
+        String licenseInfoHeaderText,
+        String obligationsText,
+        String clearingSummaryText,
+        String specialRisksOSSText,
+        String generalRisks3rdPartyText,
+        String specialRisks3rdPartyText,
+        String deliveryChannelsText,
+        String remarksAdditionalRequirementsText,
+        boolean includeObligations) throws XmlException, TException {
+
+            String projectName = project.getName();
+            String projectVersion = project.getVersion();
+
+            replaceText(document, "$license-info-header", licenseInfoHeaderText);
+            replaceText(document, "$project-name", projectName);
+            replaceText(document, "$project-version", projectVersion);
+            replaceText(document, "$obligations-text", obligationsText);
+            replaceText(document, "$clearing-summary-text", clearingSummaryText);
+            replaceText(document, "$special-risk-oss-text", specialRisksOSSText);
+            replaceText(document, "$general-risks-3rd-party-text", generalRisks3rdPartyText);
+            replaceText(document, "$special-risks-3rd-party-text", specialRisks3rdPartyText);
+            replaceText(document, "$delivery-channels-text", deliveryChannelsText);
+            replaceText(document, "$remarks-additional-requirements-text", remarksAdditionalRequirementsText);
+            fillOwnerGroup(document, project);
+            fillAttendeesTable(document, project);
+            fillReleaseBulletList(document, projectLicenseInfoResults);
+            fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
+            fillLicenseList(document, projectLicenseInfoResults);
     }
 
     private void fillOwnerGroup(XWPFDocument document, Project project) throws XmlException, TException {

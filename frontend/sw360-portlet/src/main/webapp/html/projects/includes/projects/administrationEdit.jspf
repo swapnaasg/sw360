@@ -61,34 +61,40 @@
             <input id="setToDefaultObligationsTextButton" type="button" class="addButton pull-right" value="Set To Default Text">
         </td>
     </tr>
-    <tr>
-        <td>Clearing summary:</td>
-        <td>
-            <textarea><sw360:out value="${project.clearingSummary}" /></textarea>
+     <tr>
+        <td colspan="3">
+            <label class="textlabel stackedLabel" for="clearingSummary">Clearing summary</label>
+            <textarea id="clearingSummaryText" name="<portlet:namespace/><%=Project._Fields.CLEARING_SUMMARY%>" type="text"><sw360:out value="${project.clearingSummary}" /></textarea>
         </td>
     </tr>
     <tr>
-        <td>Special risk Open Source Software:</td>
-        <td>
-            <textarea><sw360:out value="${project.specialRisksOSS}" /></textarea>
+        <td colspan="3">
+            <label class="textlabel stackedLabel" for="specialRisksOSSText">Special risk Open Source Software</label>
+            <textarea id="specialRisksOSSText" name="<portlet:namespace/><%=Project._Fields.SPECIAL_RISKS_OSS%>" type="text"><sw360:out value="${project.specialRisksOSS}" /></textarea>
         </td>
     </tr>
     <tr>
-        <td>General risk 3rd party software:</td>
-        <td>
-            <textarea><sw360:out value="${project.generalRisks3rdParty}" /></textarea>
+        <td colspan="3">
+            <label class="textlabel stackedLabel" for="generalRisks3rdParty">General risk 3rd party software</label>
+            <textarea id="generalRisks3rdPartyText" name="<portlet:namespace/><%=Project._Fields.GENERAL_RISKS3RD_PARTY%>" type="text"><sw360:out value="${project.generalRisks3rdParty}" /></textarea>
         </td>
     </tr>
     <tr>
-        <td>Sales and delivery channels:</td>
-        <td>
-            <textarea><sw360:out value="${project.deliveryChannels}" /></textarea>
+        <td colspan="3">
+            <label class="textlabel stackedLabel" for="specialRisks3rdParty">Special risks 3rd party software</label>
+            <textarea id="specialRisks3rdPartyText" name="<portlet:namespace/><%=Project._Fields.SPECIAL_RISKS3RD_PARTY%>" type="text" ><sw360:out value="${project.specialRisks3rdParty}" /></textarea>
         </td>
     </tr>
-        <tr>
-        <td>Remarks additional requirements:</td>
-        <td>
-            <textarea><sw360:out value="${project.remarksAdditonalRequirements}" /></textarea>
+    <tr>
+        <td colspan="3">
+            <label class="textlabel stackedLabel" for="deliveryChannels">Sales and delivery channels</label>
+            <textarea id="deliveryChannelsText" name="<portlet:namespace/><%=Project._Fields.DELIVERY_CHANNELS%>" type="text"><sw360:out value="${project.deliveryChannels}" /></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <label class="textlabel stackedLabel" for="remarksAdditionalRequirements">Remarks additional requirements</label>
+            <textarea id="remarksAdditionalRequirementsText" name="<portlet:namespace/><%=Project._Fields.REMARKS_ADDITIONAL_REQUIREMENTS%>"" type="text"><sw360:out value="${project.remarksAdditionalRequirements}" /></textarea>
         </td>
     </tr>
 </table>

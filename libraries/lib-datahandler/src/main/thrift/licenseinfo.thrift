@@ -106,4 +106,10 @@ service LicenseInfoService {
      */
     string getDefaultObligationsText();
 
+    /*string getClearingSummary();
+    string getSpecialRisksOSS();
+    string getGeneralRisks3rdParty();
+    string getSpecialRisks3rdParty();
+    string getDeliveryChannels();
+    string getRemarksAdditionalRequirements();*/
 }
