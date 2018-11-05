@@ -53,7 +53,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
     }
 
     @Override
-    public byte[] generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project) throws SW360Exception {
+    public byte[] generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, Collection<ObligationParsingResult> obligationResults) throws SW360Exception {
         String projectName = project.getName();
         String projectVersion = project.getVersion();
         String licenseInfoHeaderText = project.getLicenseInfoHeaderText();
@@ -108,7 +108,8 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
                             specialRisks3rdPartyText,
                             deliveryChannelsText,
                             remarksAdditionalRequirementsText,
-                            true
+                            true,
+                            obligationResults
                         );
                     } else {
                         throw new SW360Exception("Could not load the template for xwpf document: " + DOCX_TEMPLATE_REPORT_FILE);
@@ -172,7 +173,8 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
         String specialRisks3rdPartyText,
         String deliveryChannelsText,
         String remarksAdditionalRequirementsText,
-        boolean includeObligations) throws XmlException, TException {
+        boolean includeObligations,
+        Collection<ObligationParsingResult> obligationResults) throws XmlException, TException {
 
             String projectName = project.getName();
             String projectVersion = project.getVersion();

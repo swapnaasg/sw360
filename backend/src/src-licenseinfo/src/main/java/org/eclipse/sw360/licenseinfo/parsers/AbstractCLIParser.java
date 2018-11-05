@@ -18,6 +18,7 @@ import org.eclipse.sw360.datahandler.couchdb.AttachmentConnector;
 import org.eclipse.sw360.datahandler.thrift.SW360Exception;
 import org.eclipse.sw360.datahandler.thrift.attachments.AttachmentContent;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseNameWithText;
+import org.eclipse.sw360.datahandler.thrift.licenseinfo.Obligation;
 import org.eclipse.sw360.datahandler.thrift.users.User;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -55,6 +56,10 @@ public abstract class AbstractCLIParser extends LicenseInfoParser {
     private static final String LICENSE_NAME_UNKNOWN = "License name unknown";
     private static final String SPDX_IDENTIFIER_UNKNOWN = "SPDX identifier unknown";
     private static final Logger log = Logger.getLogger(CLIParser.class);
+
+    private static final String OBLIGATION_TOPIC_ELEMENT_NAME = "topic";
+    private static final String OBLIGATION_TEXT_ELEMENT_NAME = "text";
+    private static final String OBLIGATION_LICENSES_ELEMENT_NAME = "licenses";
 
     public AbstractCLIParser(AttachmentConnector attachmentConnector, AttachmentContentProvider attachmentContentProvider) {
         super(attachmentConnector, attachmentContentProvider);
@@ -145,6 +150,32 @@ public abstract class AbstractCLIParser extends LicenseInfoParser {
                 .setLicenseSpdxId(findNamedAttribute(node, SPDX_IDENTIFIER_ATTRIBUTE_NAME)
                         .map(Node::getNodeValue)
                         .orElse(SPDX_IDENTIFIER_UNKNOWN));
+    }
+
+    protected Obligation getObligationFromObligationNode(Node node) {
+
+        return new Obligation()
+                .setTopic(findNamedSubelement(node, OBLIGATION_TOPIC_ELEMENT_NAME)
+                    .map(Node::getFirstChild)
+                    .map(Node::getTextContent)
+                    .orElse("Obligation topic unknown."))
+                .setText(findNamedSubelement(node, OBLIGATION_TEXT_ELEMENT_NAME)
+                    .map(Node::getFirstChild)
+                    .map(Node::getTextContent)
+                    .orElse("Obligation name unknown."))
+                .setLicenses(findNamedSubelement(node, "licenses")
+                    .map((Node n) -> {
+                        List<String> strings = new ArrayList<String>();
+                        NodeListIterator it = new NodeListIterator(n.getChildNodes());
+                        while (it.hasNext()) {
+                            Node child = it.next();
+                            if(child.getFirstChild() != null) {
+                                strings.add(child.getNodeValue());
+                            }
+                        }
+                        return strings;
+                    })
+                    .orElse(new ArrayList<String>()));
     }
 
     protected class NodeListIterator implements Iterator<Node> {

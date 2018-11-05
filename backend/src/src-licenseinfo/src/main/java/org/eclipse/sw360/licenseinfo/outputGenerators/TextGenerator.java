@@ -16,6 +16,7 @@ package org.eclipse.sw360.licenseinfo.outputGenerators;
 import org.apache.log4j.Logger;
 import org.eclipse.sw360.datahandler.thrift.SW360Exception;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseInfoParsingResult;
+import org.eclipse.sw360.datahandler.thrift.licenseinfo.ObligationParsingResult;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.OutputFormatVariant;
 import org.eclipse.sw360.datahandler.thrift.projects.Project;
 
@@ -33,7 +34,7 @@ public class TextGenerator extends OutputGenerator<String> {
     }
 
     @Override
-    public String generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project) throws SW360Exception {
+    public String generateOutputFile(Collection<LicenseInfoParsingResult> projectLicenseInfoResults, Project project, Collection<ObligationParsingResult> obligationResults) throws SW360Exception {
         String projectName = project.getName();
         String projectVersion = project.getVersion();
         String licenseInfoHeaderText = project.getLicenseInfoHeaderText();

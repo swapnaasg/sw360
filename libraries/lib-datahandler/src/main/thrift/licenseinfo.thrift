@@ -68,6 +68,24 @@ struct LicenseInfoParsingResult {
     32: optional string version,
 }
 
+enum ObligationInfoRequestStatus {
+    SUCCESS = 0,
+    NO_APPLICABLE_SOURCE = 1,
+    FAILURE = 2,
+}
+
+struct ObligationParsingResult {
+    1: required ObligationInfoRequestStatus status,
+    2: optional string message,
+    3: optional list<Obligation> obligations,
+}
+
+struct Obligation {
+    1: required string topic,
+    2: required string text,
+    3: required list<string> licenses,
+}
+
 struct LicenseInfoFile {
     1: required OutputFormatInfo outputFormatInfo,
     2: required binary              generatedOutput,

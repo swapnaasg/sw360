@@ -62,6 +62,7 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
     protected List<OutputGenerator<?>> outputGenerators;
     protected ComponentDatabaseHandler componentDatabaseHandler;
     protected Cache<String, List<LicenseInfoParsingResult>> licenseInfoCache;
+    protected Cache<String, List<ObligationParsingResult>> obligationCache;
 
     public LicenseInfoHandler() throws MalformedURLException {
         this(new AttachmentDatabaseHandler(DatabaseSettings.getConfiguredHttpClient(), DatabaseSettings.COUCH_DB_DATABASE, DatabaseSettings.COUCH_DB_ATTACHMENTS),
@@ -73,6 +74,8 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
                               ComponentDatabaseHandler componentDatabaseHandler) throws MalformedURLException {
         this.componentDatabaseHandler = componentDatabaseHandler;
         this.licenseInfoCache = CacheBuilder.newBuilder().expireAfterWrite(CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES)
+                .maximumSize(CACHE_MAX_ITEMS).build();
+        this.obligationCache = CacheBuilder.newBuilder().expireAfterWrite(CACHE_TIMEOUT_MINUTES, TimeUnit.MINUTES)
                 .maximumSize(CACHE_MAX_ITEMS).build();
 
         AttachmentContentProvider contentProvider = attachment -> attachmentDatabaseHandler.getAttachmentContent(attachment.getAttachmentContentId());
@@ -106,6 +109,7 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
         Map<Release, Set<String>> releaseToAttachmentId = mapKeysToReleases(releaseIdsToSelectedAttachmentIds, user);
         Collection<LicenseInfoParsingResult> projectLicenseInfoResults = getAllReleaseLicenseInfos(releaseToAttachmentId, user,
                 excludedLicensesPerAttachment);
+        Collection<ObligationParsingResult> obligationsResults = getAllReleaseObligations(releaseToAttachmentId, user);
 
         String[] outputGeneratorClassnameAndVariant = outputGenerator.split("::");
         if (outputGeneratorClassnameAndVariant.length != 2) {
@@ -121,7 +125,7 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
 
         fillDefaults(project);
 
-        Object output = generator.generateOutputFile(projectLicenseInfoResults, project);
+        Object output = generator.generateOutputFile(projectLicenseInfoResults, project, obligationsResults);
         if (output instanceof byte[]) {
             licenseInfoFile.setGeneratedOutput((byte[]) output);
         } else if (output instanceof String) {
@@ -201,6 +205,52 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
         }
     }
 
+    private List<ObligationParsingResult> getObligationsForAttachment(Release release, String attachmentContentId, User user)
+            throws TException {
+        if (release == null) {
+            return Collections.singletonList(new ObligationParsingResult()
+                                                    .setStatus(ObligationInfoRequestStatus.NO_APPLICABLE_SOURCE)
+                                                    .setMessage(MSG_NO_RELEASE_GIVEN));
+        }
+
+        List<ObligationParsingResult> cachedResults = obligationCache.getIfPresent(attachmentContentId);
+        if (cachedResults != null) {
+            return cachedResults;
+        }
+
+        Attachment attachment = nullToEmptySet(release.getAttachments()).stream()
+                .filter(a -> a.getAttachmentContentId().equals(attachmentContentId)).findFirst().orElseThrow(() -> {
+                    String message = String.format(
+                            "Attachment selected for obligations info generation is not found in release's attachments. Release id: %s. Attachment content id: %s",
+                            release.getId(), attachmentContentId);
+                    return new IllegalStateException(message);
+                });
+
+        try {
+
+            List<LicenseInfoParser> applicableParsers = parsers.stream()
+                    .filter(parser -> wrapTException(() -> parser.isApplicableTo(attachment, user, release))).collect(Collectors.toList());
+
+            if (applicableParsers.size() == 0) {
+                LOGGER.warn("No applicable parser has been found for the attachment selected for license information");
+                return Collections.singletonList(new ObligationParsingResult()
+                        .setStatus(ObligationInfoRequestStatus.NO_APPLICABLE_SOURCE)
+                        .setMessage("No applicable parser has been found for the attachment."));
+            } else if (applicableParsers.size() > 1) {
+                LOGGER.info("More than one parser claims to be able to parse attachment with contend id " + attachmentContentId);
+            }
+
+            List<ObligationParsingResult> results = applicableParsers.stream()
+                    .map(parser -> wrapTException(() -> parser.getObligations(attachment, user, release)))
+                    .collect(Collectors.toList());
+
+            obligationCache.put(attachmentContentId, results);
+            return results;
+        } catch (WrappedTException exception) {
+            throw exception.getCause();
+        }
+    }
+
     private LicenseInfoParsingResult assignFileNameToLicenseInfoParsingResult(LicenseInfoParsingResult licenseInfoParsingResult, String filename) {
         if (licenseInfoParsingResult.getLicenseInfo() == null) {
             licenseInfoParsingResult.setLicenseInfo(new LicenseInfo());
@@ -254,6 +304,21 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
 
                     results.addAll(
                             parsedLicenses.stream().map(result -> filterLicenses(result, licencesToExclude)).collect(Collectors.toList()));
+                }
+            }
+        }
+
+        return results;
+    }
+
+    protected Collection<ObligationParsingResult> getAllReleaseObligations(Map<Release, Set<String>> releaseToSelectedAttachmentIds, User user)
+            throws TException {
+        List<ObligationParsingResult> results = Lists.newArrayList();
+
+        for (Entry<Release, Set<String>> entry : releaseToSelectedAttachmentIds.entrySet()) {
+            for (String attachmentContentId : entry.getValue()) {
+                if (attachmentContentId != null) {
+                    results.addAll(getObligationsForAttachment(entry.getKey(), attachmentContentId, user));
                 }
             }
         }

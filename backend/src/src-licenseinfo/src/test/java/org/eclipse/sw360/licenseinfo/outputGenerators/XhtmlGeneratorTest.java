@@ -121,6 +121,7 @@ public class XhtmlGeneratorTest {
 
         LicenseInfoParsingResult lipresultEmpty = generateLIPResult(liEmpty, releaseName, version1, vendorName);
         lipresultsEmpty = Collections.singletonList(lipresultEmpty);
+        Collection<ObligationParsingResult> obligationResults = new HashSet();
 
         xhtmlGenerator = new XhtmlGenerator(OutputFormatVariant.DISCLOSURE, "License Disclosure as XHTML");
 
@@ -130,10 +131,10 @@ public class XhtmlGeneratorTest {
         p.setLicenseInfoHeaderText("Lorem");
         p.setObligationsText("Ipsum");
 
-        xmlString = xhtmlGenerator.generateOutputFile(lipresults, p);
-        xmlString2 = xhtmlGenerator.generateOutputFile(lipresults2, p);
-        xmlString3 = xhtmlGenerator.generateOutputFile(lipresults3, p);
-        xmlStringEmpty = xhtmlGenerator.generateOutputFile(lipresultsEmpty, p);
+        xmlString = xhtmlGenerator.generateOutputFile(lipresults, p, obligationResults);
+        xmlString2 = xhtmlGenerator.generateOutputFile(lipresults2, p, obligationResults);
+        xmlString3 = xhtmlGenerator.generateOutputFile(lipresults3, p, obligationResults);
+        xmlStringEmpty = xhtmlGenerator.generateOutputFile(lipresultsEmpty, p, obligationResults);
 
         generateDocumentsFromXml();
     }

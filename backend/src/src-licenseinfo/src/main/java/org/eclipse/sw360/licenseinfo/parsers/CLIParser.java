@@ -19,6 +19,9 @@ import org.eclipse.sw360.datahandler.thrift.attachments.Attachment;
 import org.eclipse.sw360.datahandler.thrift.attachments.AttachmentContent;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseInfo;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseInfoParsingResult;
+import org.eclipse.sw360.datahandler.thrift.licenseinfo.Obligation;
+import org.eclipse.sw360.datahandler.thrift.licenseinfo.ObligationParsingResult;
+import org.eclipse.sw360.datahandler.thrift.licenseinfo.ObligationInfoRequestStatus;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseInfoRequestStatus;
 import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseNameWithText;
 import org.eclipse.sw360.datahandler.thrift.users.User;
@@ -33,6 +36,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 
 import static org.eclipse.sw360.datahandler.common.CommonUtils.closeQuietly;
@@ -46,6 +50,7 @@ public class CLIParser extends AbstractCLIParser {
     private static final Logger log = Logger.getLogger(CLIParser.class);
     private static final String COPYRIGHTS_XPATH = "/ComponentLicenseInformation/Copyright/Content";
     private static final String LICENSES_XPATH = "/ComponentLicenseInformation/License";
+    private static final String OBLIGATIONS_XPATH = "/ComponentLicenseInformation/Obligation";
     private static final String CLI_ROOT_ELEMENT_NAME = "ComponentLicenseInformation";
     private static final String CLI_ROOT_ELEMENT_NAMESPACE = null;
 
@@ -88,6 +93,35 @@ public class CLIParser extends AbstractCLIParser {
             closeQuietly(attachmentStream, log);
         }
         return Collections.singletonList(result);
+    }
+
+    @Override
+    public <T> ObligationParsingResult getObligations(Attachment attachment, User user, T context) throws TException {
+        AttachmentContent attachmentContent = attachmentContentProvider.getAttachmentContent(attachment);
+        ObligationParsingResult result = new ObligationParsingResult();
+
+        InputStream attachmentStream = null;
+
+        try {
+            attachmentStream = attachmentConnector.getAttachmentStream(attachmentContent, user, context);
+            Document doc = getDocument(attachmentStream);
+
+            NodeList obligationNodes = getNodeListByXpath(doc, OBLIGATIONS_XPATH);
+            List<Obligation> obligations = new ArrayList<Obligation>();
+
+            for (int i = 0; i < obligationNodes.getLength(); i++){
+                obligations.add(getObligationFromObligationNode(obligationNodes.item(i)));
+            }
+
+            result.setObligations(obligations);
+            result.setStatus(ObligationInfoRequestStatus.SUCCESS);
+        } catch (ParserConfigurationException | IOException | XPathExpressionException | SAXException | SW360Exception e) {
+            log.error(e);
+            result.setStatus(ObligationInfoRequestStatus.FAILURE).setMessage("Error while parsing CLI file: " + e.toString());
+        } finally {
+            closeQuietly(attachmentStream, log);
+        }
+        return result;
     }
 
     private Set<LicenseNameWithText> getLicenseNameWithTexts(Document doc) throws XPathExpressionException {
