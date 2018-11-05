@@ -195,7 +195,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
     }
 
     private void fillOwnerGroup(XWPFDocument document, Project project) throws XmlException, TException {
-        String ownerGroup = "HELLO";
+        String ownerGroup = "";
         if(project.isSetOwnerGroup()) {
             ownerGroup = project.getOwnerGroup();
         }
