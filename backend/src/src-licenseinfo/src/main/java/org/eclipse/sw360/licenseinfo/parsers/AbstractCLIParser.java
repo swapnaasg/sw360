@@ -170,7 +170,7 @@ public abstract class AbstractCLIParser extends LicenseInfoParser {
                         while (it.hasNext()) {
                             Node child = it.next();
                             if(child.getFirstChild() != null) {
-                                strings.add(child.getNodeValue());
+                                strings.add(child.getTextContent());
                             }
                         }
                         return strings;
