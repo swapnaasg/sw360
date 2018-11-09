@@ -191,6 +191,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
             replaceText(document, "$remarks-additional-requirements-text", remarksAdditionalRequirementsText);
             fillOwnerGroup(document, project);
             fillAttendeesTable(document, project);
+            fillSpecialOSSRisksTable(document, project, obligationResults);
             fillReleaseBulletList(document, projectLicenseInfoResults);
             fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
             fillLicenseList(document, projectLicenseInfoResults);
@@ -215,6 +216,68 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
             row.addNewTableCell().setText(owner);
             row.addNewTableCell().setText("Department");
             row.addNewTableCell().setText("Owner");
+        }
+    }
+
+    private class ObligationKey {
+
+        public final String topic;
+        public final String text;
+
+        public ObligationKey(String topic, String text) {
+            this.topic = topic;
+            this.text = text;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ObligationKey)) return false;
+            ObligationKey key = (ObligationKey) o;
+            return topic == key.topic && text == key.text;
+        }
+
+        @Override
+        public int hashCode() {
+            return (topic == null ? 0 : topic.hashCode()) ^ (text == null ? 0 : text.hashCode());
+        }
+
+    }
+
+    private void fillSpecialOSSRisksTable(XWPFDocument document, Project project, Collection<ObligationParsingResult> obligationResults) throws XmlException, TException {
+
+        XWPFTable table = document.getTables().get(1);
+
+        // primitive key handling but works
+        Map<ObligationKey,ArrayList<String>> collatedObligations = new HashMap<ObligationKey,ArrayList<String>>();
+
+        for(ObligationParsingResult result : obligationResults) {
+            if(result.getStatus() != ObligationInfoRequestStatus.SUCCESS) {
+                continue;
+            }
+            for(Obligation obligation : result.getObligations()) {
+                ObligationKey key = new ObligationKey(obligation.getTopic(), obligation.getText());
+                if(!collatedObligations.containsKey(key)) {
+                    collatedObligations.put(key, new ArrayList<String>());
+                }
+                ArrayList<String> licenses = collatedObligations.get(key);
+                for(String license : obligation.getLicenses()) {
+                    System.out.println(license);
+                    if(!licenses.contains(license)) {
+                        licenses.add(license);
+                    }
+                }
+            }
+        }
+
+        int currentRow = 1;
+        for( ObligationKey key :  collatedObligations.keySet()) {
+            ArrayList<String> licenses = collatedObligations.get(key);
+            XWPFTableRow row = table.insertNewTableRow(currentRow++);
+            String licensesString = String.join("\n", licenses);
+            row.addNewTableCell().setText(key.topic);
+            row.addNewTableCell().setText(licensesString);
+            row.addNewTableCell().setText(key.text);
         }
     }
 
