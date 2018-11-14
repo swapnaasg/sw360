@@ -192,6 +192,7 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
             fillOwnerGroup(document, project);
             fillAttendeesTable(document, project);
             fillSpecialOSSRisksTable(document, project, obligationResults);
+            fillOverview3rdPartyComponentTable(document, projectLicenseInfoResults);
             fillReleaseBulletList(document, projectLicenseInfoResults);
             fillReleaseDetailList(document, projectLicenseInfoResults, includeObligations);
             fillLicenseList(document, projectLicenseInfoResults);
@@ -278,6 +279,31 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
             row.addNewTableCell().setText(key.topic);
             row.addNewTableCell().setText(licensesString);
             row.addNewTableCell().setText(key.text);
+        }
+    }
+
+    private void fillOverview3rdPartyComponentTable(XWPFDocument document, Collection<LicenseInfoParsingResult> projectLicenseInfoResults) throws XmlException {
+        XWPFTable table = document.getTables().get(2);
+
+        int currentRow = 1;
+        for(LicenseInfoParsingResult result : projectLicenseInfoResults) {
+            if(result.getStatus() != ObligationInfoRequestStatus.SUCCESS) {
+                continue;
+            }
+
+            row.addNewTableCell().setText(result.getName());
+            row.addNewTableCell().setText(result.getRelease());
+            row.addNewTableCell().setText(licenseInfo.getSha1Hash());
+            row.addNewTableCell().setText(licenseInfo.getComponent());
+
+            String type = "";
+            String licenses = "";
+            for(LicenseNameWithText l : licenseInfo.getLicenseNamesWithTexts()) {
+                type += l.getType() + "\n";
+                licenses += l.getLicenseName() + "\n";
+            }
+            row.addNewTableCell().setText(type);
+            row.addNewTableCell().setText(licenses);
         }
     }
 

@@ -47,6 +47,7 @@ struct LicenseNameWithText {
     /* 3: optional i32 id, removed since only used as counter in XhtmlGenerator */
     4: optional string acknowledgements,
     5: optional string licenseSpdxId,
+    6: optional string type,
 }
 
 struct LicenseInfo {
@@ -55,6 +56,8 @@ struct LicenseInfo {
 
     20: optional set<string> copyrights,
     21: optional set<LicenseNameWithText> licenseNamesWithTexts,
+    22: optional string sha1Hash,
+    23: optional string component,
 }
 
 struct LicenseInfoParsingResult {

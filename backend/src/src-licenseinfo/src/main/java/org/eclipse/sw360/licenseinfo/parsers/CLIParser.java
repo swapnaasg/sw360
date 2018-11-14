@@ -27,6 +27,7 @@ import org.eclipse.sw360.datahandler.thrift.licenseinfo.LicenseNameWithText;
 import org.eclipse.sw360.datahandler.thrift.users.User;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -52,6 +53,7 @@ public class CLIParser extends AbstractCLIParser {
     private static final String LICENSES_XPATH = "/ComponentLicenseInformation/License";
     private static final String OBLIGATIONS_XPATH = "/ComponentLicenseInformation/Obligation";
     private static final String CLI_ROOT_ELEMENT_NAME = "ComponentLicenseInformation";
+    private static final String CLI_ROOT_XPATH = "/ComponentLicenseInformation";
     private static final String CLI_ROOT_ELEMENT_NAMESPACE = null;
 
     public CLIParser(AttachmentConnector attachmentConnector, AttachmentContentProvider attachmentContentProvider) {
@@ -84,6 +86,9 @@ public class CLIParser extends AbstractCLIParser {
 
             Set<LicenseNameWithText> licenseNamesWithTexts = getLicenseNameWithTexts(doc);
             licenseInfo.setLicenseNamesWithTexts(licenseNamesWithTexts);
+
+            licenseInfo.setSha1Hash(getSha1Hash(doc));
+            licenseInfo.setComponent(getComponent(doc));
 
             result.setStatus(LicenseInfoRequestStatus.SUCCESS);
         } catch (ParserConfigurationException | IOException | XPathExpressionException | SAXException | SW360Exception e) {
@@ -132,6 +137,32 @@ public class CLIParser extends AbstractCLIParser {
     private Set<String> getCopyrights(Document doc) throws XPathExpressionException {
         NodeList copyrightNodes = getNodeListByXpath(doc, COPYRIGHTS_XPATH);
         return nodeListToStringSet(copyrightNodes);
+    }
+
+    private String getSha1Hash(Document doc) throws XPathExpressionException {
+        NodeList copyrightNodes = getNodeListByXpath(doc, CLI_ROOT_XPATH);
+
+        if(copyrightNodes.getLength() < 1) {
+            return "";
+        }
+
+        String result = findNamedAttribute(copyrightNodes.item(0), "componentSHA1")
+                        .map(Node::getNodeValue)
+                        .orElse("");
+        return result;
+    }
+
+    private String getComponent(Document doc) throws XPathExpressionException {
+        NodeList copyrightNodes = getNodeListByXpath(doc, CLI_ROOT_XPATH);
+
+        if(copyrightNodes.getLength() < 1) {
+            return "";
+        }
+
+        String result = findNamedAttribute(copyrightNodes.item(0), "component")
+                        .map(Node::getNodeValue)
+                        .orElse("");
+        return result;
     }
 
     private Set<LicenseNameWithText> nodeListToLicenseNamesWithTextsSet(NodeList nodes){

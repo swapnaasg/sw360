@@ -53,8 +53,10 @@ public abstract class AbstractCLIParser extends LicenseInfoParser {
     protected static final String XML_FILE_EXTENSION = ".xml";
     private static final String LICENSENAME_ATTRIBUTE_NAME = "name";
     private static final String SPDX_IDENTIFIER_ATTRIBUTE_NAME = "spdxidentifier";
+    private static final String TYPE_ATTRIBUTE_NAME = "type";
     private static final String LICENSE_NAME_UNKNOWN = "License name unknown";
     private static final String SPDX_IDENTIFIER_UNKNOWN = "SPDX identifier unknown";
+    private static final String TYPE_UNKNOWN = "Type unknown";
     private static final Logger log = Logger.getLogger(CLIParser.class);
 
     private static final String OBLIGATION_TOPIC_ELEMENT_NAME = "topic";
@@ -149,7 +151,10 @@ public abstract class AbstractCLIParser extends LicenseInfoParser {
                         .orElse(LICENSE_NAME_UNKNOWN))
                 .setLicenseSpdxId(findNamedAttribute(node, SPDX_IDENTIFIER_ATTRIBUTE_NAME)
                         .map(Node::getNodeValue)
-                        .orElse(SPDX_IDENTIFIER_UNKNOWN));
+                        .orElse(SPDX_IDENTIFIER_UNKNOWN))
+                .setType(findNamedAttribute(node, TYPE_ATTRIBUTE_NAME)
+                        .map(Node::getNodeValue)
+                        .orElse(TYPE_UNKNOWN));
     }
 
     protected Obligation getObligationFromObligationNode(Node node) {
