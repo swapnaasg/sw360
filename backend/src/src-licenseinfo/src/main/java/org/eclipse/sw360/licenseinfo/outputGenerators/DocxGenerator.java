@@ -28,6 +28,8 @@ import org.eclipse.sw360.datahandler.thrift.licenses.License;
 import org.eclipse.sw360.datahandler.thrift.licenses.LicenseService;
 import org.eclipse.sw360.datahandler.thrift.licenses.Todo;
 import org.eclipse.sw360.datahandler.thrift.projects.Project;
+import org.eclipse.sw360.datahandler.thrift.users.UserService;
+import org.eclipse.sw360.datahandler.thrift.users.User;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -211,11 +213,16 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
 
         int currentRow = 7;
 
+        UserService.Iface userClient = new ThriftClients().makeUserClient();
+
         if(project.isSetProjectOwner()) {
+            User owner = userClient.getByEmail(project.getProjectOwner());
+            if(owner == null) {
+                return;
+            }
             XWPFTableRow row = table.insertNewTableRow(currentRow++);
-            String owner =  project.getProjectOwner();
-            row.addNewTableCell().setText(owner);
-            row.addNewTableCell().setText("Department");
+            row.addNewTableCell().setText(owner.getEmail());
+            row.addNewTableCell().setText(owner.getDepartment());
             row.addNewTableCell().setText("Owner");
         }
     }
@@ -287,12 +294,14 @@ public class DocxGenerator extends OutputGenerator<byte[]> {
 
         int currentRow = 1;
         for(LicenseInfoParsingResult result : projectLicenseInfoResults) {
-            if(result.getStatus() != ObligationInfoRequestStatus.SUCCESS) {
+            if(result.getStatus() != LicenseInfoRequestStatus.SUCCESS) {
                 continue;
             }
 
+            XWPFTableRow row = table.insertNewTableRow(currentRow++);
+            LicenseInfo licenseInfo = result.getLicenseInfo();
             row.addNewTableCell().setText(result.getName());
-            row.addNewTableCell().setText(result.getRelease());
+            row.addNewTableCell().setText(result.getVersion());
             row.addNewTableCell().setText(licenseInfo.getSha1Hash());
             row.addNewTableCell().setText(licenseInfo.getComponent());
 
