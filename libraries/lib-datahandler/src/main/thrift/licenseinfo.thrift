@@ -70,6 +70,10 @@ struct LicenseInfoParsingResult {
     31: optional string name,
     32: optional string version,
     33: optional string componentType,
+
+    42: optional set<string> componentLanguages,
+    43: optional set<string> componentSoftwarePlatforms,
+    44: optional set<string> componentOperatingSystems,
 }
 
 enum ObligationInfoRequestStatus {

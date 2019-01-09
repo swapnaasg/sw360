@@ -1,5 +1,5 @@
 /*
- * Copyright Siemens AG, 2016-2018. Part of the SW360 Portal Project.
+ * Copyright Siemens AG, 2016-2019. Part of the SW360 Portal Project.
  *
  * SPDX-License-Identifier: EPL-1.0
  *
@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.eclipse.sw360.datahandler.common.CommonUtils.nullToEmptySet;
 import static org.eclipse.sw360.datahandler.common.SW360Assert.assertNotNull;
@@ -381,6 +382,24 @@ public class LicenseInfoHandler implements LicenseInfoService.Iface {
         parsingResults.forEach(result -> {
             if( component != null) {
                 result.setComponentType(toString(component.getComponentType()));
+
+                if(component.isSetLanguages()) {
+                    result.setComponentLanguages(component.getLanguages());
+                } else {
+                    result.setComponentLanguages(Collections.singleton("Unknown languages."));
+                }
+
+                if(component.isSetSoftwarePlatforms()) {
+                    result.setComponentSoftwarePlatforms(component.getSoftwarePlatforms());
+                } else {
+                    result.setComponentSoftwarePlatforms(Collections.singleton("Unknown platforms."));
+                }
+
+                if(component.isSetOperatingSystems()) {
+                    result.setComponentOperatingSystems(component.getOperatingSystems());
+                } else {
+                    result.setComponentOperatingSystems(Collections.singleton("Unknown Operating system."));
+                }
             } else {
                 // just being extra defensive
                 result.setComponentType("Unknown component.");
